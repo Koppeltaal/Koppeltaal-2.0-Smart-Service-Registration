@@ -1,6 +1,9 @@
+.nav-extended {
+    margin-bottom: 20px;
+}
+
 .nav-extended > div {
     padding: 0 20px;
-    margin-bottom: 20px;
 }
 
 /* label color */

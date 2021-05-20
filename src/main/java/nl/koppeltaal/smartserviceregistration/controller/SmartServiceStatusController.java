@@ -1,33 +1,29 @@
 package nl.koppeltaal.smartserviceregistration.controller;
 
-import java.net.URL;
+import java.util.UUID;
 import javax.servlet.http.HttpSession;
+import nl.koppeltaal.smartserviceregistration.model.SmartServiceStatus;
 import nl.koppeltaal.smartserviceregistration.service.SmartServiceService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping("register")
-public class RegisterSmartServiceController {
+@RequestMapping("status")
+public class SmartServiceStatusController {
 
   private final SmartServiceService smartServiceService;
 
-  public RegisterSmartServiceController(SmartServiceService smartServiceService) {
+  public SmartServiceStatusController(SmartServiceService smartServiceService) {
     this.smartServiceService = smartServiceService;
   }
 
-  @GetMapping
-  public String serveHtml() {
-    return "register";
-  }
-
   @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  public String registerNewServiceRequest(@RequestParam URL jwksEndpoint, HttpSession session) {
-    smartServiceService.registerNewService(jwksEndpoint, (String) session.getAttribute("user"));
+  public String registerNewServiceRequest(@RequestParam UUID id, @RequestParam SmartServiceStatus status, HttpSession session) {
+    smartServiceService.updateSmartServiceStatus(id, status, (String) session.getAttribute("user"));
+
     return "redirect:/";
   }
 }

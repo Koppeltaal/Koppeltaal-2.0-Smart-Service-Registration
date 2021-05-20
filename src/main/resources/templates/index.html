@@ -5,11 +5,44 @@
 <body>
 <nav th:replace="fragment/header :: header(selected='index')"></nav>
 <div class="container">
-  request overview
+  <table class="striped highlight">
+    <thead>
+    <tr>
+      <th>client_id</th>
+      <th>status</th>
+      <th>aanvraagdatum</th>
+      <th>requester</th>
+      <th>endpoint</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="smartService, smartServiceStat : ${smartServices}">
+      <td th:text="${smartService.clientId}"/>
+      <td>
+        <form method="post" th:action="${'/status'}">
+          <input type="hidden" name="id" th:value="${smartService.id}">
+          <select name="status" onchange="this.form.submit()">
+            <option value="PENDING" th:selected='${#strings.equals(smartService.status, "PENDING")}'>😴 Pending</option>
+            <option value="APPROVED" th:selected='${#strings.equals(smartService.status, "APPROVED")}'>✅ Approved</option>
+            <option value="REJECTED" th:selected='${#strings.equals(smartService.status, "REJECTED")}'>⛔ Rejected</option>
+          </select>
+        </form>
+      </td>
+      <td th:text="${#temporals.format(smartService.createdOn, 'dd-MM-yyyy HH:mm')}"/>
+      <td th:text="${smartService.createdBy}"/>
+      <td th:text="${smartService.jwksEndpoint}"/>
+    </tr>
+    </tbody>
+  </table>
 </div>
 </body>
 
 <!--JavaScript at end of body for optimized loading-->
 <script type="text/javascript" src="js/materialize.min.js"></script>
-
+<script>
+  (function() {
+    // Initialize materialize select
+    M.FormSelect.init(document.querySelectorAll('select'), {});
+  })();
+</script>
 </html>
