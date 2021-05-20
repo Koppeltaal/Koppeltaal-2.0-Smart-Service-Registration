@@ -1,13 +1,15 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <title>Getting Started: Serving Web Content</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<head th:replace="fragment/head :: head">
 </head>
 <body>
-<p th:text="'Hello, ' + ${user} + '!'" />
-<form th:action="@{/logout}" method="post">
-  <button>logout</button>
-</form>
+<nav th:replace="fragment/header :: header(selected='index')"></nav>
+<div class="container">
+  request overview
+</div>
 </body>
+
+<!--JavaScript at end of body for optimized loading-->
+<script type="text/javascript" src="js/materialize.min.js"></script>
+
 </html>

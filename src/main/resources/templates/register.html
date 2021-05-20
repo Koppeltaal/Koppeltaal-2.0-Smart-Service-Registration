@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/head :: head"></head>
+<body>
+<nav th:replace="fragment/header :: header(selected='register')"></nav>
+<div class="container">
+  <div class="row new-registry">
+    <div class="col s12 m6">
+      <div class="card cyan darken-3">
+        <form method="post">
+          <div class="card-content white-text">
+            <span class="card-title">Nieuwe aanvraag SMART Backend Service</span>
+              <div class="input-field">
+                <input placeholder="JWKS endpoint" id="jwks_endpoint" name="jwksEndpoint" type="url" class="validate">
+                <label for="jwks_endpoint">JWKS Endpoint</label>
+                <span class="helper-text"></span>
+              </div>
+          </div>
+          <div class="card-action">
+            <button disabled id="submit-button" class="btn waves-effect waves-light amber darken-1" type="submit" name="action">Submit
+              <i class="material-icons right">send</i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+
+<!--JavaScript at end of body for optimized loading-->
+<script type="text/javascript" src="js/materialize.min.js"></script>
+<script>
+  (function()  {
+
+    // Set HTML5 validity - we must have an HTTPS endpoint
+    const constraint = new RegExp("^https://.+", "");
+
+    const updateSaveButton = function(event) {
+      const input = event.target;
+      const value = input.value;
+      let isValid = false;
+
+      try {
+        const url = new URL(value);
+        isValid = url.protocol === "https:";
+      } catch (_) {}
+
+      const saveButton = document.getElementById('submit-button');
+
+      if(isValid) {
+        saveButton.removeAttribute("disabled");
+        input.setCustomValidity("");
+      } else {
+        saveButton.setAttribute("disabled", "true");
+        input.setCustomValidity("HTTPS endpoint vereist");
+      }
+      input.reportValidity();
+    };
+
+    const jwksInput = document.getElementById('jwks_endpoint');
+    jwksInput.addEventListener('keyup', updateSaveButton, true);
+  })();
+</script>
+
+</html>

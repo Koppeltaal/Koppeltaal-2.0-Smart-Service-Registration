@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<nav th:fragment="header (selected)" class="nav-extended amber darken-1">
+  <div class="nav-wrapper">
+    &nbsp; <a href="#" class="brand-logo">SMART Service Registratie <i class="large material-icons">lock</i></a>
+    <ul id="nav-mobile" class="right">
+      <form th:action="@{/logout}" method="post">
+        <button class="btn deep-orange">logout</button>
+      </form>
+    </ul>
+  </div>
+  <div class="nav-content loggedin amber lighten-3">
+    <ul class="tabs tabs-transparent">
+      <li class="tab"><a href="/" th:class="${selected == 'index' ? 'active' : ''}">Overzicht</a></li>
+      <li class="tab"><a href="register" th:class="${selected == 'register' ? 'active' : ''}">Aanvraag Indienen</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+</html>
