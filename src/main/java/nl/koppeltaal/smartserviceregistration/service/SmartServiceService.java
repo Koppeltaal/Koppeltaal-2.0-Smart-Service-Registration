@@ -37,7 +37,7 @@ public class SmartServiceService {
   }
 
   public Iterable<SmartService> findAll() {
-    return repository.findAll();
+    return repository.findByOrderByCreatedOnDesc();
   }
 
   public SmartService updateSmartServiceStatus(UUID id, SmartServiceStatus status, String user) {
