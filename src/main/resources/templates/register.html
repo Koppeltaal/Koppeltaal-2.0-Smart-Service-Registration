@@ -5,16 +5,19 @@
 <nav th:replace="fragment/header :: header(selected='register')"></nav>
 <div class="container">
   <div class="row new-registry">
-    <div class="col s12 m6">
-      <div class="card cyan darken-3">
+    <div class="col s12">
+      <div class="card ">
         <form method="post">
-          <div class="card-content white-text">
+          <div class="card-content amber-text">
+            <div class="row">
             <span class="card-title">Nieuwe aanvraag SMART Backend Service</span>
-              <div class="input-field">
+              <div class="input-field col s6">
+                <i class="material-icons prefix">contact_mail</i>
                 <input placeholder="JWKS endpoint" id="jwks_endpoint" name="jwksEndpoint" type="url" class="validate">
                 <label for="jwks_endpoint">JWKS Endpoint</label>
                 <span class="helper-text"></span>
               </div>
+            </div>
           </div>
           <div class="card-action">
             <button disabled id="submit-button" class="btn waves-effect waves-light amber darken-1" type="submit" name="action">Submit
@@ -39,21 +42,24 @@
     const updateSaveButton = function(event) {
       const input = event.target;
       const value = input.value;
-      let isValid = false;
+      let isHttps = false;
+      let isJwks = false;
 
       try {
         const url = new URL(value);
-        isValid = url.protocol === "https:";
+        isHttps = url.protocol === "https:";
+        isJwks = value.endsWith("/.well-known/jwks.json");
       } catch (_) {}
 
       const saveButton = document.getElementById('submit-button');
 
-      if(isValid) {
+      if(isHttps && isJwks) {
         saveButton.removeAttribute("disabled");
         input.setCustomValidity("");
       } else {
         saveButton.setAttribute("disabled", "true");
-        input.setCustomValidity("HTTPS endpoint vereist");
+        if(!isHttps) input.setCustomValidity("HTTPS endpoint vereist");
+        else if(!isJwks) input.setCustomValidity("Eindigt niet met /.well-known/jwks.json");
       }
       input.reportValidity();
     };
