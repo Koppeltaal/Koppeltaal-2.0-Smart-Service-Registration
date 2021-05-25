@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -23,6 +25,7 @@ public class SmartService extends DbEntity {
   @Column(name = "client_id")
   private String clientId = UUID.randomUUID().toString();
 
+  @Enumerated(EnumType.STRING)
   private SmartServiceStatus status = SmartServiceStatus.PENDING;
 
   @NotNull
