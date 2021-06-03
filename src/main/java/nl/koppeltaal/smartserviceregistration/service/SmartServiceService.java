@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.RSAKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.UUID;
@@ -63,7 +64,12 @@ public class SmartServiceService {
     KeyFactory keyFactory;
     try {
       keyFactory = KeyFactory.getInstance("RSA");
-      keyFactory.generatePublic(keySpec);
+      final RSAKey pubKey = (RSAKey) keyFactory.generatePublic(keySpec);
+      final int bitLength = pubKey.getModulus().bitLength();
+
+      if(bitLength < 2048)
+        throw new SmartServiceException("",
+            String.format("Key needs to be at least 2048 bits but got [%d] instead", bitLength), null);
 
       return true;
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
