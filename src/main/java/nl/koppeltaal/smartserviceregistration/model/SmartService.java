@@ -1,6 +1,5 @@
 package nl.koppeltaal.smartserviceregistration.model;
 
-import com.sun.istack.NotNull;
 import java.net.URL;
 import java.util.UUID;
 import javax.persistence.Column;
@@ -32,7 +31,7 @@ public class SmartService extends DbEntity {
   @Column(name = "jwks_endpoint")
   private URL jwksEndpoint;
 
-  @Column(name = "public_key")
+  @Column(name = "public_key", length = 512)
   private String publicKey;
 
   public String getClientId() {
