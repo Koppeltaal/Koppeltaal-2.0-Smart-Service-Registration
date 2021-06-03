@@ -13,6 +13,7 @@
       <th>aanvraagdatum</th>
       <th>requester</th>
       <th>endpoint</th>
+      <th>public key</th>
     </tr>
     </thead>
     <tbody>
@@ -31,6 +32,7 @@
       <td th:text="${#temporals.format(smartService.createdOn, 'dd-MM-yyyy HH:mm')}"/>
       <td th:text="${smartService.createdBy}"/>
       <td th:text="${smartService.jwksEndpoint}"/>
+      <td th:text="${smartService.publicKey}"/>
     </tr>
     </tbody>
   </table>

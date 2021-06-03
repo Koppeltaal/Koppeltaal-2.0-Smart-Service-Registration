@@ -33,3 +33,24 @@
 .input-field .prefix.active {
     color: #ffb300;
 }
+
+.tabs .tab a{
+    color:#ffb300;
+} /*Black color to the text*/
+
+.tabs .tab a:hover {
+    color:#ffb300;
+} /*Text color on hover*/
+
+.tabs .tab a.active {
+    color:#ffb300;
+} /*Background and text color when a tab is active*/
+
+.tabs .indicator {
+    background-color:#ffb300;
+} /*Color of underline*/
+
+.tabs .tab a.active:focus {
+    background-color: transparent;
+
+}

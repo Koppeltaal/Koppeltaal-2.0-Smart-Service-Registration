@@ -6,20 +6,44 @@
 <div class="container">
   <div class="row new-registry">
     <div class="col s12">
-      <div class="card ">
+      <div class="card">
         <form method="post">
           <div class="card-content amber-text">
             <div class="row">
-            <span class="card-title">Nieuwe aanvraag SMART Backend Service</span>
+              <div class="col s12">
+                <ul id="card-tabs" class="tabs tabs-fixed-width">
+                  <li class="tab col s3"><a class="active" href="#jwks_url">JWKS URL</a></li>
+                  <li class="tab col s3"><a href="#public_key">Public Key</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="row">
+              <span class="card-title">Nieuwe aanvraag SMART Backend Service</span>
               <div class="row col s12" th:if="${error != null}" >
                 <h6 class="red-text" th:text="${error.message}"></h6>
               </div>
-              <div class="input-field col s6">
-                <i class="material-icons prefix">contact_mail</i>
-                <input th:if="${error == null}" placeholder="JWKS endpoint" id="jwks_endpoint" name="jwksEndpoint" type="url" class="validate">
-                <input th:if="${error != null}" placeholder="JWKS endpoint" id="jwks_endpoint" name="jwksEndpoint" type="url" class="validate" th:value="${error.endpoint}">
-                <label for="jwks_endpoint">JWKS Endpoint</label>
-                <span class="helper-text"></span>
+            </div>
+            <div class="row">
+              <div id="jwks_url" class="col s12">
+                <div class="input-field col s6">
+                  <i class="material-icons prefix">contact_mail</i>
+                  <input th:if="${error == null}" placeholder="JWKS endpoint" id="jwks_endpoint" name="jwksEndpoint" type="url" class="validate">
+                  <input th:if="${error != null}" placeholder="JWKS endpoint" id="jwks_endpoint" name="jwksEndpoint" type="url" class="validate" th:value="${error.endpoint}">
+                  <label for="jwks_endpoint">JWKS Endpoint</label>
+                  <span class="helper-text"></span>
+                </div>
+              </div>
+              <div id="public_key" class="col s12">
+                <div class="row">
+                  <div class="input-field col s12">
+                    <textarea id="public_key_textarea" class="materialize-textarea" name="publicKey"
+                              style="min-height: 100px;" placeholder="-----BEGIN PUBLIC KEY-----
+MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMeqb5874k8CwSAHmy88vv4pyxUN5C4p
+T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
+-----END PUBLIC KEY-----"></textarea>
+                    <label for="public_key_textarea">RSA512 Key</label>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -39,8 +63,10 @@
 <script type="text/javascript" src="js/materialize.min.js"></script>
 <script th:inline="javascript">
   (function()  {
+    M.Tabs.init(document.getElementById('card-tabs'));
+    M.textareaAutoResize(document.getElementById('public_key_textarea'));
 
-    const updateSaveButton = function(event) {
+    const validateJwksUrl = function(event) {
       const input = event.target;
       const value = input.value;
 
@@ -55,24 +81,42 @@
         isJwks = value.endsWith("/.well-known/jwks.json");
 
         isUnique = ![[${registeredEndpoints}]].includes(value);
+        isUnique = true;
       } catch (_) {}
 
-      const saveButton = document.getElementById('submit-button');
-
-      if(isHttps && isJwks && isUnique) {
-        saveButton.removeAttribute("disabled");
+      const valid = isHttps && isJwks && isUnique;
+      updateSaveButton(valid);
+      if(valid) {
         input.setCustomValidity("");
       } else {
-        saveButton.setAttribute("disabled", "true");
         if(!isHttps) input.setCustomValidity("HTTPS endpoint vereist");
         else if(!isJwks) input.setCustomValidity("Eindigt niet met /.well-known/jwks.json");
         else if(!isUnique) input.setCustomValidity("Endpoint niet meer beschikbaar");
       }
+
       input.reportValidity();
     };
 
+    const validatePublicKey = function(event) {
+      updateSaveButton(!!event.target.value)
+    };
+
+    const updateSaveButton = function(isValid) {
+
+      const saveButton = document.getElementById('submit-button');
+
+      if(isValid) {
+        saveButton.removeAttribute("disabled");
+      } else {
+        saveButton.setAttribute("disabled", "true");
+      }
+    }
+
     const jwksInput = document.getElementById('jwks_endpoint');
-    jwksInput.addEventListener('keyup', updateSaveButton, true);
+    jwksInput.addEventListener('keyup', validateJwksUrl, true);
+
+    const textarea = document.getElementById('public_key_textarea');
+    textarea.addEventListener('keyup', validatePublicKey, true);
   })();
 </script>
 

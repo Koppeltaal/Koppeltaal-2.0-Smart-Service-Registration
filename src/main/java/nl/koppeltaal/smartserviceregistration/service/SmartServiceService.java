@@ -1,11 +1,18 @@
 package nl.koppeltaal.smartserviceregistration.service;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.UUID;
-import nl.koppeltaal.smartserviceregistration.exception.DuplicateJwksEndpointException;
+import nl.koppeltaal.smartserviceregistration.exception.SmartServiceException;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import nl.koppeltaal.smartserviceregistration.model.SmartServiceStatus;
 import nl.koppeltaal.smartserviceregistration.repository.SmartServiceRepository;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,17 +29,45 @@ public class SmartServiceService {
     this.repository = repository;
   }
 
-  public SmartService registerNewService(URL jwksEndpoint, String currentUser) {
+  public SmartService registerNewService(String jwksEndpoint, String publicKey, String currentUser) {
 
     final SmartService smartService = new SmartService();
 
-    smartService.setJwksEndpoint(jwksEndpoint);
+    if(StringUtils.isNotBlank(jwksEndpoint)) {
+      try {
+        smartService.setJwksEndpoint(new URL(jwksEndpoint));
+      } catch (MalformedURLException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    if(StringUtils.isNotBlank(publicKey) &&  isValidPublicKey(publicKey)) {
+      smartService.setPublicKey(publicKey);
+    }
+
     smartService.setCreatedBy(currentUser);
 
     try {
       return repository.save(smartService);
     } catch (DataIntegrityViolationException e) {
-      throw new DuplicateJwksEndpointException(jwksEndpoint.toString(), jwksEndpoint + " is reeds geregistreerd.", e);
+      throw new SmartServiceException(jwksEndpoint, jwksEndpoint + " is reeds geregistreerd.", e);
+    }
+  }
+
+  private boolean isValidPublicKey(String publicKey) {
+    String cleanPublicKey = publicKey.replace("-----BEGIN PUBLIC KEY-----\r\n", "");
+    cleanPublicKey = cleanPublicKey.replace("\r\n-----END PUBLIC KEY-----", "");
+    byte[] encoded = Base64.decodeBase64(cleanPublicKey);
+
+    X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
+    KeyFactory keyFactory;
+    try {
+      keyFactory = KeyFactory.getInstance("RSA");
+      keyFactory.generatePublic(keySpec);
+
+      return true;
+    } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+      throw new SmartServiceException("", "Incorrect public key", e);
     }
   }
 

@@ -16,7 +16,8 @@ import javax.persistence.UniqueConstraint;
  */
 @Entity
 @Table(name = "smart_service", uniqueConstraints = {
-    @UniqueConstraint(name = "unique_jwks_endpoint", columnNames = "jwks_endpoint")
+    @UniqueConstraint(name = "unique_jwks_endpoint", columnNames = "jwks_endpoint"),
+    @UniqueConstraint(name = "unique_public_key", columnNames = "public_key")
 }, indexes = {
     @Index(name = "client_id_index", columnList = "client_id", unique = true)
 })
@@ -28,9 +29,11 @@ public class SmartService extends DbEntity {
   @Enumerated(EnumType.STRING)
   private SmartServiceStatus status = SmartServiceStatus.PENDING;
 
-  @NotNull
   @Column(name = "jwks_endpoint")
   private URL jwksEndpoint;
+
+  @Column(name = "public_key")
+  private String publicKey;
 
   public String getClientId() {
     return clientId;
@@ -56,12 +59,21 @@ public class SmartService extends DbEntity {
     this.jwksEndpoint = jwksEndpoint;
   }
 
+  public String getPublicKey() {
+    return publicKey;
+  }
+
+  public void setPublicKey(String publicKey) {
+    this.publicKey = publicKey;
+  }
+
   @Override
   public String toString() {
     return "SmartService{" +
         "clientId='" + clientId + '\'' +
         ", status=" + status +
         ", jwksEndpoint=" + jwksEndpoint +
+        ", publicKey='" + publicKey + '\'' +
         "} " + super.toString();
   }
 }

@@ -3,14 +3,14 @@ package nl.koppeltaal.smartserviceregistration.exception;
 import org.springframework.dao.DataIntegrityViolationException;
 
 /**
- * Custom exception that provides the actual endpoint to the templating  enginge for error reporting
+ * Custom exception that provides the actual endpoint to the templating  engine for error reporting
  * and proper UI restoring of the value
  */
-public class DuplicateJwksEndpointException extends RuntimeException {
+public class SmartServiceException extends RuntimeException {
 
   private final String endpoint;
 
-  public DuplicateJwksEndpointException(String endpoint, String message, DataIntegrityViolationException e) {
+  public SmartServiceException(String endpoint, String message, Throwable e) {
     super(message, e);
     this.endpoint = endpoint;
   }

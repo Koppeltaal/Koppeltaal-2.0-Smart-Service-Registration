@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.servlet.http.HttpSession;
-import nl.koppeltaal.smartserviceregistration.exception.DuplicateJwksEndpointException;
+import nl.koppeltaal.smartserviceregistration.exception.SmartServiceException;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import nl.koppeltaal.smartserviceregistration.service.SmartServiceService;
 import org.springframework.http.MediaType;
@@ -32,6 +32,7 @@ public class RegisterSmartServiceController {
 
     final Set<String> registeredEndpoints = StreamSupport
         .stream(smartServiceService.findAll().spliterator(), false)
+        .filter(smartService -> smartService.getJwksEndpoint() != null)
         .map(SmartService::getJwksEndpoint)
         .map(URL::toString)
         .collect(Collectors.toSet());
@@ -42,13 +43,13 @@ public class RegisterSmartServiceController {
   }
 
   @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  public String registerNewServiceRequest(@RequestParam URL jwksEndpoint, HttpSession session) {
-    smartServiceService.registerNewService(jwksEndpoint, (String) session.getAttribute("user"));
+  public String registerNewServiceRequest(@RequestParam String jwksEndpoint, @RequestParam String publicKey, HttpSession session) {
+    smartServiceService.registerNewService(jwksEndpoint, publicKey, (String) session.getAttribute("user"));
     return "redirect:/";
   }
 
-  @ExceptionHandler(DuplicateJwksEndpointException.class)
-  public String handleUniqueConstraint(Model model, Exception exception) {
+  @ExceptionHandler(SmartServiceException.class)
+  public String handleError(Model model, Exception exception) {
 
     model.addAttribute("error", exception);
 
