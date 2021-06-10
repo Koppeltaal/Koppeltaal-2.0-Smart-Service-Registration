@@ -26,15 +26,10 @@ public class HomeController {
   @GetMapping("/")
   public String showHome(HttpSession session, Model model) {
 
-    final Object user = session.getAttribute("user");
+    model.addAttribute("smartServices", smartServiceService.findAll());
+    model.addAttribute("user", session.getAttribute("user"));
 
-    if(user !=  null) {
-      model.addAttribute("smartServices", smartServiceService.findAll());
-      model.addAttribute("user", user);
-      return "index";
-    }
-
-    return "redirect:/login";
+    return "index";
   }
 
 }
