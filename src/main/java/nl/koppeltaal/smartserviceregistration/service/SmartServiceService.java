@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Optional;
 import java.util.UUID;
 import nl.koppeltaal.smartserviceregistration.exception.SmartServiceException;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
@@ -92,5 +93,20 @@ public class SmartServiceService {
 
     smartService.setStatus(status);
     return repository.save(smartService);
+  }
+
+  public void delete(UUID id, String user) {
+
+    final Optional<SmartService> optionalSmartService = repository.findById(id);
+
+    if(optionalSmartService.isEmpty()) {
+      LOG.warn("User [{}] tried to delete smart service with id [{}] but it doesn't exist", user, id);
+      return;
+    }
+
+    final SmartService smartService = optionalSmartService.get();
+
+    LOG.info("User [{}] deleted SmartService {}.", user, smartService);
+    repository.delete(smartService);
   }
 }

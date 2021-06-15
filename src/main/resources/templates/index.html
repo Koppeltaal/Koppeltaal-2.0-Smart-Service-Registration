@@ -14,10 +14,11 @@
       <th>requester</th>
       <th>endpoint</th>
       <th>public key</th>
+      <th></th>
     </tr>
     </thead>
     <tbody>
-    <tr th:each="smartService, smartServiceStat : ${smartServices}">
+    <tr th:each="smartService, smartServiceStat : ${smartServices}" th:attr="data-service-id=${smartService.id}">
       <td th:text="${smartService.clientId}"/>
       <td>
         <form method="post" th:action="${'/status'}">
@@ -33,6 +34,9 @@
       <td th:text="${smartService.createdBy}"/>
       <td th:text="${smartService.jwksEndpoint}"/>
       <td th:text="${smartService.publicKey}"/>
+      <td class="delete-service" th:attr="data-service-id=${smartService.id}, data-client-id=${smartService.clientId}">
+        <i class="material-icons">delete</i>
+      </td>
     </tr>
     </tbody>
   </table>
@@ -45,6 +49,25 @@
   (function() {
     // Initialize materialize select
     M.FormSelect.init(document.querySelectorAll('select'), {});
+
+    document.querySelectorAll('.delete-service').forEach(deleteInput => {
+      const id = deleteInput.getAttribute('data-service-id')
+      const client_id = deleteInput.getAttribute('data-client-id')
+
+      deleteInput.addEventListener('click', () => {
+        if(confirm(`Weet je zeker dat je de client_id [${client_id}] wilt verwijderen?`)) {
+          fetch(`register/${id}`, {
+            credentials: 'include',
+            method: 'DELETE',
+          })
+          .then(() => {
+            const tr = document.querySelector(`tr[data-service-id="${id}"]`)
+
+            if(tr) tr.parentNode.removeChild(tr);
+          })
+        }
+      })
+    });
   })();
 </script>
 </html>

@@ -1,3 +1,9 @@
+.delete-service {
+    width: 40px;
+    cursor: pointer;
+    padding: 7px;
+}
+
 .nav-extended {
     margin-bottom: 20px;
 }
