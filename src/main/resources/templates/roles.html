@@ -28,7 +28,9 @@
     </tr>
     </tbody>
   </table>
-  <a id="add-role-button" class="fixed-btn-floating btn-floating btn-large waves-effect waves-light modal-trigger red" href="#add-role-modal"><i class="material-icons">add</i></a>
+  <div class="fixed-action-btn">
+    <a id="add-role-button" class="btn-floating btn-large waves-effect waves-light modal-trigger red fixed-action-btn" href="#add-role-modal"><i class="material-icons">add</i></a>
+  </div>
   <div id="add-role-modal" class="modal">
     <form action="/roles" th:object="${newRole}" method="post">
       <div class="modal-content">

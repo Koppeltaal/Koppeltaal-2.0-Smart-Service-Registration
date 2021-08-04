@@ -24,8 +24,9 @@
     </tr>
     </tbody>
   </table>
-  <a id="add-permission-button" class="fixed-btn-floating btn-floating btn-large waves-effect waves-light modal-trigger red" href="#add-permission-modal"><i class="material-icons">add</i></a>
-
+  <div class="fixed-action-btn">
+    <a id="add-permission-button" class="fixed-action-btn btn-floating btn-large waves-effect waves-light modal-trigger red" href="#add-permission-modal"><i class="material-icons">add</i></a>
+  </div>
   <!-- Modal Structure -->
   <div id="add-permission-modal" class="modal">
     <form th:action="@{addPermission(id=${role.id})}" th:object="${newPermission}" method="post">

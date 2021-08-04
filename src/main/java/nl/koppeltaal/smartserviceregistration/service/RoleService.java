@@ -59,4 +59,8 @@ public class RoleService {
       throw new RoleException(roleId, e.getMessage(), e);
     }
   }
+
+  public void deletePermission(UUID permissionId) {
+    permissionRepository.deleteById(permissionId);
+  }
 }

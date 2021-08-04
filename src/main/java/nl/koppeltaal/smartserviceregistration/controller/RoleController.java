@@ -82,6 +82,14 @@ public class RoleController {
     return editRole(roleId, model, session);
   }
 
+  @PostMapping(value = "deletePermission", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String deletePermission(@RequestParam UUID permissionId, @RequestParam UUID roleId, Model model, HttpSession session) {
+
+    roleService.deletePermission(permissionId);
+
+    return editRole(roleId, model, session);
+  }
+
   @ExceptionHandler(RoleException.class)
   public String handleError(Model model, HttpSession session, RoleException exception) {
 

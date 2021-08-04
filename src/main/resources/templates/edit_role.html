@@ -27,6 +27,7 @@
       <th>Resource</th>
       <th>Operation</th>
       <th>Scope</th>
+      <th>Delete</th>
     </tr>
     </thead>
     <tbody>
@@ -37,10 +38,17 @@
       <td th:text="${permission.resourceType}" />
       <td th:text="${permission.operation}" />
       <td th:text="${permission.scope}" />
+      <td>
+        <form th:action="@{/roles/deletePermission(permissionId=${permission.id}, roleId=${role.id})}" method="post">
+          <button type="submit"><i class="material-icons">delete</i></button>
+        </form>
+      </td>
     </tr>
     </tbody>
   </table>
-  <a id="add-permission-button" class="fixed-btn-floating btn-floating btn-large waves-effect waves-light modal-trigger red" href="#add-permission-modal"><i class="material-icons">add</i></a>
+  <div class="fixed-action-btn">
+    <a id="add-permission-button" class="btn-floating btn-large waves-effect waves-light modal-trigger red" href="#add-permission-modal"><i class="material-icons">add</i></a>
+  </div>
 
   <!-- Modal Structure -->
   <div id="add-permission-modal" class="modal">

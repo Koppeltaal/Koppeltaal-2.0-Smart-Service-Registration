@@ -83,11 +83,6 @@ thead, tbody tr {
     bottom: 0;
     right: 0;
 }
-.fixed-btn-floating {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-}
 
 nav.black-text .breadcrumb:before {
     color: black;

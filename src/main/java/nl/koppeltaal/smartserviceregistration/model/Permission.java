@@ -23,7 +23,7 @@ import javax.persistence.UniqueConstraint;
 })
 public class Permission extends DbEntity {
 
-  @ManyToOne(cascade = CascadeType.REMOVE)
+  @ManyToOne
   @JoinColumn(name = "role_id", nullable = false)
   private Role role;
 
