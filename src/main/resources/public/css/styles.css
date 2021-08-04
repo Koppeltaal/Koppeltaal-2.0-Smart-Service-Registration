@@ -73,3 +73,22 @@ thead, tbody tr {
     width:100%;
     table-layout:fixed;
 }
+
+#add-permission-modal {
+    height: 75%;
+    max-height: 100%;
+}
+#add-permission-modal .modal-footer {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+.fixed-btn-floating {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+nav.black-text .breadcrumb:before {
+    color: black;
+}

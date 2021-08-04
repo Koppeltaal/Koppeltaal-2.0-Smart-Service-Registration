@@ -1,14 +1,22 @@
 package nl.koppeltaal.smartserviceregistration.model;
 
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * This entity resembles a <a href="https://hl7.org/fhir/uv/bulkdata/authorization/index.html">SMART Backend Service</a>.
@@ -22,6 +30,10 @@ import javax.persistence.UniqueConstraint;
 })
 public class SmartService extends DbEntity {
 
+  @ManyToOne
+  @JoinColumn(name = "role_id")
+  private Role role;
+
   @Column(name = "client_id")
   private String clientId = UUID.randomUUID().toString();
 
@@ -33,6 +45,14 @@ public class SmartService extends DbEntity {
 
   @Column(name = "public_key", length = 512)
   private String publicKey;
+
+  public Role getRole() {
+    return role;
+  }
+
+  public void setRole(Role role) {
+    this.role = role;
+  }
 
   public String getClientId() {
     return clientId;
@@ -69,7 +89,8 @@ public class SmartService extends DbEntity {
   @Override
   public String toString() {
     return "SmartService{" +
-        "clientId='" + clientId + '\'' +
+        "role=" + role +
+        ", clientId='" + clientId + '\'' +
         ", status=" + status +
         ", jwksEndpoint=" + jwksEndpoint +
         ", publicKey='" + publicKey + '\'' +

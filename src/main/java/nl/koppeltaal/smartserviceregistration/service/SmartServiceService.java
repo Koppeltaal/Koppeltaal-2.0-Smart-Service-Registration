@@ -10,8 +10,10 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Optional;
 import java.util.UUID;
 import nl.koppeltaal.smartserviceregistration.exception.SmartServiceException;
+import nl.koppeltaal.smartserviceregistration.model.Permission;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import nl.koppeltaal.smartserviceregistration.model.SmartServiceStatus;
+import nl.koppeltaal.smartserviceregistration.repository.PermissionRepository;
 import nl.koppeltaal.smartserviceregistration.repository.SmartServiceRepository;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
@@ -27,8 +29,16 @@ public class SmartServiceService {
 
   private final SmartServiceRepository repository;
 
-  public SmartServiceService(SmartServiceRepository repository) {
+  private final PermissionRepository permissionRepository;
+
+  public SmartServiceService(SmartServiceRepository repository,
+      PermissionRepository permissionRepository) {
     this.repository = repository;
+    this.permissionRepository = permissionRepository;
+  }
+
+  public Optional<SmartService> findById(UUID id) {
+    return repository.findById(id);
   }
 
   public SmartService registerNewService(String jwksEndpoint, String publicKey, String currentUser) {

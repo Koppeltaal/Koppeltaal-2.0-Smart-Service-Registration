@@ -33,7 +33,7 @@ public class RegisterSmartServiceController {
   }
 
   @GetMapping
-  public String serveHtml(Model model) {
+  public String serveHtml(Model model, HttpSession session) {
 
     final Set<String> registeredEndpoints = StreamSupport
         .stream(smartServiceService.findAll().spliterator(), false)
@@ -43,6 +43,7 @@ public class RegisterSmartServiceController {
         .collect(Collectors.toSet());
 
     model.addAttribute("registeredEndpoints", registeredEndpoints);
+    model.addAttribute("user", session.getAttribute("user"));
 
     return "register";
   }
@@ -60,10 +61,10 @@ public class RegisterSmartServiceController {
   }
 
   @ExceptionHandler(SmartServiceException.class)
-  public String handleError(Model model, Exception exception) {
+  public String handleError(Model model, HttpSession session, Exception exception) {
 
     model.addAttribute("error", exception);
 
-    return serveHtml(model);
+    return serveHtml(model, session);
   }
 }

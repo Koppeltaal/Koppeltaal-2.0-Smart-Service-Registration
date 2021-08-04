@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/head :: head">
+</head>
+<body>
+<nav th:replace="fragment/header :: header(selected='roles')"></nav>
+<div class="container">
+  <table class="striped highlight">
+    <thead>
+    <tr>
+      <th>Naam</th>
+      <th>Aangemaakt op</th>
+      <th>Aantal permissies</th>
+      <th>Edit</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(roles)}">
+      <td colspan="3">Geen rollen aangemaakt</td>
+    </tr>
+    <tr th:if="${not #lists.isEmpty(roles)}" th:each="role, roleStat : ${roles}" th:attr="data-service-id=${role.id}">
+      <td th:text="${role.name}"/>
+      <td th:text="${#temporals.format(role.createdOn, 'dd-MM-yyyy HH:mm')}"/></td>
+      <td th:text="${#lists.size(role.permissions)}"/>
+      <td class="edit-authorizations">
+        <a th:href="@{/roles/edit(id=${role.id})}"><i class="material-icons">edit</i></a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <a id="add-role-button" class="fixed-btn-floating btn-floating btn-large waves-effect waves-light modal-trigger red" href="#add-role-modal"><i class="material-icons">add</i></a>
+  <div id="add-role-modal" class="modal">
+    <form action="/roles" th:object="${newRole}" method="post">
+      <div class="modal-content">
+        <h4>Rol Toevoegen</h4>
+        <p>Geef de rol een naam. Nadat de rol opgeslagen is kunt u permissies koppelen aan de rol.</p>
+        <div class="row">
+            <div class="input-field col s12">
+              <input name="name" placeholder="Naam" id="role-name" type="text" class="validate">
+              <label for="role-name">Rolnaam</label>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <a href="#!" class="modal-close waves-effect waves-green grey btn-flat"><i class="material-icons left">cancel</i>Annuleren</a>
+          <button type="submit" class="modal-close waves-effect waves-green white-text green btn-flat"><i class="material-icons left">save</i>Opslaan</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+</body>
+
+<!--JavaScript at end of body for optimized loading-->
+<script type="text/javascript" src="/js/materialize.min.js"></script>
+<script>
+  (function() {
+    // Initialize materialize select
+    M.FormSelect.init(document.querySelectorAll('select'), {});
+
+    M.Modal.init(document.querySelectorAll('.modal'), {});
+  })();
+</script>
+</html>

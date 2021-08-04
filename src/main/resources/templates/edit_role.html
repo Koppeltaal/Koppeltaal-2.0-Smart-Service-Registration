@@ -1,0 +1,105 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/head :: head">
+</head>
+<body>
+<nav th:replace="fragment/header :: header(selected='roles')"></nav>
+<div class="container">
+  <div class="row">
+    <nav class="transparent black-text">
+      <div class="nav-wrapper">
+        <div class="col s12">
+          <a href="/roles" class="breadcrumb black-text">Rollen</a>
+          <a href="#!" class="breadcrumb black-text" th:text="${role.name}" /></a>
+        </div>
+      </div>
+    </nav>
+  </div>
+  <h4>Rolpermissies beheren</h4>
+  <p>Hier  vindt u een overzicht van de gekoppelde permissies voor de rol <i><b><span th:text="${role.name}"/></b></i>. U kunt hier ook nieuwe permissies koppelen.</p>
+
+  <table class="striped">
+    <thead>
+    <tr>
+      <th>Resource</th>
+      <th>Operation</th>
+      <th>Scope</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(role.permissions)}">
+      <td colspan="3">Geen permissies toegekend</td>
+    </tr>
+    <tr th:if="${not #lists.isEmpty(role.permissions)}" th:each="permission, permissionStat : ${role.permissions}">
+      <td th:text="${permission.resourceType}" />
+      <td th:text="${permission.operation}" />
+      <td th:text="${permission.scope}" />
+    </tr>
+    </tbody>
+  </table>
+  <a id="add-permission-button" class="fixed-btn-floating btn-floating btn-large waves-effect waves-light modal-trigger red" href="#add-permission-modal"><i class="material-icons">add</i></a>
+
+  <!-- Modal Structure -->
+  <div id="add-permission-modal" class="modal">
+    <form th:action="@{addPermission(id=${role.id})}" th:object="${newPermission}" method="post">
+      <div class="modal-content">
+        <h4>Permissie Toevoegen</h4>
+        <p>Voeg hieronder een permissie toe voor de rol <i><b><span th:text="${role.name}"/></b></i>.</p>
+        <div class="row">
+            <div class="row">
+              <div class="input-field col s12">
+                <select name="resourceType" th:value="${newPermission.resourceType}">
+                  <option value="" disabled selected>Kies een resource</option>
+                  <option value="ACTIVITY_DEFINITION">ActivityDefinition</option>
+                  <option value="CARE_TEAM">CareTeam</option>
+                  <option value="TASK">Task</option>
+                  <option value="PATIENT">Patient</option>
+                  <option value="PRACTITIONER">Practitioner</option>
+                  <option value="RELATED_PERSON">RelatedPerson</option>
+                  <option value="ENDPOINT">Endpoint</option>
+                  <option value="ORGANIZATION">Organization</option>
+                  <option value="SUBSCRIPTION">Subscription</option>
+                </select>
+                <label>Resource</label>
+              </div>
+              <div class="input-field col s12">
+                <select name="operation" th:value="${newPermission.operation}">
+                  <option value="" disabled selected>Kies een operatie</option>
+                  <option value="CREATE">Create</option>
+                  <option value="READ">Read</option>
+                  <option value="UPDATE">Update</option>
+                  <option value="DELETE">Delete</option>
+                </select>
+                <label>CRUD</label>
+              </div>
+              <div class="input-field col s12">
+                <select name="scope" th:value="${newPermission.scope}">
+                  <option value="" disabled selected>Kies een scope</option>
+                  <option value="ALL">All</option>
+                  <option value="OWN">Own</option>
+                  <option value="GRANTED">Granted</option>
+                </select>
+                <label>Scope</label>
+              </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green grey btn-flat"><i class="material-icons left">cancel</i>Annuleren</a>
+        <button type="submit" class="modal-close waves-effect waves-green white-text green btn-flat"><i class="material-icons left">add</i>Toekennen</button>
+      </div>
+    </div>
+  </form>
+</div>
+</body>
+
+<!--JavaScript at end of body for optimized loading-->
+<script type="text/javascript" src="/js/materialize.min.js"></script>
+<script>
+  (function() {
+    // Initialize materialize select
+    M.FormSelect.init(document.querySelectorAll('select'), {});
+
+    M.Modal.init(document.querySelectorAll('.modal'), {});
+  })();
+</script>
+</html>
