@@ -9,8 +9,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Optional;
 import java.util.UUID;
-import nl.koppeltaal.smartserviceregistration.exception.SmartServiceException;
-import nl.koppeltaal.smartserviceregistration.model.Permission;
+import nl.koppeltaal.smartserviceregistration.exception.SmartServiceRegistrationException;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import nl.koppeltaal.smartserviceregistration.model.SmartServiceStatus;
 import nl.koppeltaal.smartserviceregistration.repository.PermissionRepository;
@@ -62,7 +61,7 @@ public class SmartServiceService {
     try {
       return repository.save(smartService);
     } catch (DataIntegrityViolationException e) {
-      throw new SmartServiceException(jwksEndpoint, jwksEndpoint + " is reeds geregistreerd.", e);
+      throw new SmartServiceRegistrationException(jwksEndpoint, jwksEndpoint + " is reeds geregistreerd.", e);
     }
   }
 
@@ -79,12 +78,12 @@ public class SmartServiceService {
       final int bitLength = pubKey.getModulus().bitLength();
 
       if(bitLength < 2048)
-        throw new SmartServiceException("",
+        throw new SmartServiceRegistrationException("",
             String.format("Key needs to be at least 2048 bits but got [%d] instead", bitLength), null);
 
       return true;
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-      throw new SmartServiceException("", "Incorrect public key", e);
+      throw new SmartServiceRegistrationException("", "Incorrect public key", e);
     }
   }
 

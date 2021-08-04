@@ -2,12 +2,14 @@ package nl.koppeltaal.smartserviceregistration.service;
 
 import java.util.Optional;
 import java.util.UUID;
+import nl.koppeltaal.smartserviceregistration.exception.RoleException;
 import nl.koppeltaal.smartserviceregistration.model.Permission;
 import nl.koppeltaal.smartserviceregistration.model.Role;
 import nl.koppeltaal.smartserviceregistration.repository.PermissionRepository;
 import nl.koppeltaal.smartserviceregistration.repository.RoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,14 +41,22 @@ public class RoleService {
     return repository.save(role);
   }
 
-  public void addPermission(Permission permission, UUID smartServiceId) {
+  public void addPermission(Permission permission, UUID roleId) {
 
-    final Role role = repository.findById(smartServiceId)
-        .orElseThrow(() -> new IllegalArgumentException("Unknown role id"));
-    permission.setRole(role);
+    try {
+      final Role role = repository.findById(roleId)
+          .orElseThrow(() -> new IllegalArgumentException("Unknown role id"));
+      permission.setRole(role);
 
-    permissionRepository.save(permission);
+      permissionRepository.save(permission);
 
-    repository.save(role);
+      repository.save(role);
+    } catch (DataIntegrityViolationException e) {
+      throw new RoleException(roleId, String.format(
+          "Er bestaat al een permissie voor resource [%s] en operation [%s]. Deze combinatie moet uniek zijn.",
+          permission.getResourceType(), permission.getOperation()), e);
+    } catch (Exception e) {
+      throw new RoleException(roleId, e.getMessage(), e);
+    }
   }
 }

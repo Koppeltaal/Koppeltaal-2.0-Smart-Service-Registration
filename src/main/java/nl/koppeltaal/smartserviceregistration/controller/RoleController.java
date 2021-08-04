@@ -10,12 +10,15 @@ package nl.koppeltaal.smartserviceregistration.controller;
 
 import java.util.UUID;
 import javax.servlet.http.HttpSession;
+import nl.koppeltaal.smartserviceregistration.exception.RoleException;
 import nl.koppeltaal.smartserviceregistration.model.Permission;
 import nl.koppeltaal.smartserviceregistration.model.Role;
 import nl.koppeltaal.smartserviceregistration.service.RoleService;
+import nl.koppeltaal.smartserviceregistration.service.SmartServiceService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,9 +30,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class RoleController {
 
   private final RoleService roleService;
+  private final SmartServiceService smartServiceService;
 
-  public RoleController(RoleService roleService) {
+  public RoleController(RoleService roleService,
+      SmartServiceService smartServiceService) {
     this.roleService = roleService;
+    this.smartServiceService = smartServiceService;
   }
 
   @GetMapping
@@ -57,12 +63,13 @@ public class RoleController {
 
     final Role role = roleService.findById(roleId)
         .orElseThrow(() -> new IllegalArgumentException("Unknown smart service id"));
-
     model.addAttribute("role", role);
+
     final Permission permission = new Permission();
     permission.setRole(role);
-
     model.addAttribute("newPermission", permission);
+
+    model.addAttribute("smartServices", smartServiceService.findAll());
 
     return "edit_role";
   }
@@ -73,5 +80,13 @@ public class RoleController {
     roleService.addPermission(permission, roleId);
 
     return editRole(roleId, model, session);
+  }
+
+  @ExceptionHandler(RoleException.class)
+  public String handleError(Model model, HttpSession session, RoleException exception) {
+
+    model.addAttribute("error", exception);
+
+    return editRole(exception.getRoleId(), model, session);
   }
 }

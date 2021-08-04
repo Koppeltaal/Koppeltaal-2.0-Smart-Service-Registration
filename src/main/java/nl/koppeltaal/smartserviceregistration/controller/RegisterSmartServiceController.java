@@ -7,7 +7,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.servlet.http.HttpSession;
-import nl.koppeltaal.smartserviceregistration.exception.SmartServiceException;
+import nl.koppeltaal.smartserviceregistration.exception.SmartServiceRegistrationException;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import nl.koppeltaal.smartserviceregistration.service.SmartServiceService;
 import org.springframework.http.MediaType;
@@ -60,7 +60,7 @@ public class RegisterSmartServiceController {
     smartServiceService.delete(id, (String) session.getAttribute("user"));
   }
 
-  @ExceptionHandler(SmartServiceException.class)
+  @ExceptionHandler(SmartServiceRegistrationException.class)
   public String handleError(Model model, HttpSession session, Exception exception) {
 
     model.addAttribute("error", exception);

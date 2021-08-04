@@ -6,11 +6,11 @@ import org.springframework.dao.DataIntegrityViolationException;
  * Custom exception that provides the actual endpoint to the templating  engine for error reporting
  * and proper UI restoring of the value
  */
-public class SmartServiceException extends RuntimeException {
+public class SmartServiceRegistrationException extends RuntimeException {
 
   private final String endpoint;
 
-  public SmartServiceException(String endpoint, String message, Throwable e) {
+  public SmartServiceRegistrationException(String endpoint, String message, Throwable e) {
     super(message, e);
     this.endpoint = endpoint;
   }

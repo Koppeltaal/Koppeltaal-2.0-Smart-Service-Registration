@@ -15,6 +15,9 @@
       </div>
     </nav>
   </div>
+  <div class="row col s12" th:if="${error != null}" >
+    <h6 class="red-text" th:text="${error.message}"></h6>
+  </div>
   <h4>Rolpermissies beheren</h4>
   <p>Hier  vindt u een overzicht van de gekoppelde permissies voor de rol <i><b><span th:text="${role.name}"/></b></i>. U kunt hier ook nieuwe permissies koppelen.</p>
 
