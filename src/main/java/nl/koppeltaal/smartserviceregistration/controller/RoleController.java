@@ -10,8 +10,8 @@ package nl.koppeltaal.smartserviceregistration.controller;
 
 import java.util.UUID;
 import javax.servlet.http.HttpSession;
+import nl.koppeltaal.smartserviceregistration.dto.PermissionDto;
 import nl.koppeltaal.smartserviceregistration.exception.RoleException;
-import nl.koppeltaal.smartserviceregistration.model.Permission;
 import nl.koppeltaal.smartserviceregistration.model.Role;
 import nl.koppeltaal.smartserviceregistration.service.RoleService;
 import nl.koppeltaal.smartserviceregistration.service.SmartServiceService;
@@ -65,7 +65,7 @@ public class RoleController {
         .orElseThrow(() -> new IllegalArgumentException("Unknown smart service id"));
     model.addAttribute("role", role);
 
-    final Permission permission = new Permission();
+    final PermissionDto permission = new PermissionDto();
     permission.setRole(role);
     model.addAttribute("newPermission", permission);
 
@@ -75,9 +75,9 @@ public class RoleController {
   }
 
   @PostMapping(value = "addPermission", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  public String addPermission(@RequestParam("id") UUID roleId, @ModelAttribute("permission") Permission permission, Model model, HttpSession session) {
+  public String addPermission(@RequestParam("id") UUID roleId, @ModelAttribute("permission") PermissionDto permissionDto, Model model, HttpSession session) {
 
-    roleService.addPermission(permission, roleId);
+    roleService.addPermission(permissionDto, roleId);
 
     return editRole(roleId, model, session);
   }

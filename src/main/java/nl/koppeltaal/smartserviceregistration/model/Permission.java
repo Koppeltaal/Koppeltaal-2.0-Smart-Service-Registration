@@ -7,12 +7,16 @@
  */
 package nl.koppeltaal.smartserviceregistration.model;
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -26,6 +30,14 @@ public class Permission extends DbEntity {
   @ManyToOne
   @JoinColumn(name = "role_id", nullable = false)
   private Role role;
+
+  @ManyToMany(cascade = CascadeType.ALL)
+  @JoinTable(
+      name = "permission_service_grant",
+      joinColumns = @JoinColumn(name="permission_id"),
+      inverseJoinColumns = @JoinColumn(name = "smart_service_id")
+  )
+  private Set<SmartService> grantedServices = new HashSet<>();
 
   @Enumerated(EnumType.STRING)
   @Column(name = "resource_type")
@@ -69,10 +81,19 @@ public class Permission extends DbEntity {
     this.scope = scope;
   }
 
+  public Set<SmartService> getGrantedServices() {
+    return grantedServices;
+  }
+
+  public void setGrantedServices(Set<SmartService> grantedServices) {
+    this.grantedServices = grantedServices;
+  }
+
   @Override
   public String toString() {
     return "Permission{" +
         "role=" + role +
+        ", grantedServices=" + grantedServices +
         ", resourceType=" + resourceType +
         ", operation=" + operation +
         ", scope=" + scope +

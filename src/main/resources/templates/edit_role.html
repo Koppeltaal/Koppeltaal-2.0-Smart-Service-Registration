@@ -27,7 +27,8 @@
       <th>Resource</th>
       <th>Operation</th>
       <th>Scope</th>
-      <th>Delete</th>
+      <th>Granted</th>
+      <th>Acties</th>
     </tr>
     </thead>
     <tbody>
@@ -38,6 +39,10 @@
       <td th:text="${permission.resourceType}" />
       <td th:text="${permission.operation}" />
       <td th:text="${permission.scope}" />
+      <td>
+        <span th:text="${grantedServiceStat.last} ? ${grantedService.name} : ${grantedService.name + ', '}" th:each="grantedService, grantedServiceStat : ${permission.grantedServices}">
+        </span>
+      </td>
       <td>
         <form th:action="@{/roles/deletePermission(permissionId=${permission.id}, roleId=${role.id})}" method="post">
           <button class="btn amber" type="submit"><i class="material-icons">delete</i></button>
@@ -84,13 +89,21 @@
                 <label>CRUD</label>
               </div>
               <div class="input-field col s12">
-                <select name="scope" th:value="${newPermission.scope}">
+                <select id="scope-select" name="scope" th:value="${newPermission.scope}">
                   <option value="" disabled selected>Kies een scope</option>
                   <option value="ALL">All</option>
                   <option value="OWN">Own</option>
                   <option value="GRANTED">Granted</option>
                 </select>
                 <label>Scope</label>
+              </div>
+              <div id="authorized-services-container" class="input-field col s12 hiddendiv">
+                <div class="row" th:each="smartService : ${smartServices}">
+                  <label class="col">
+                    <input type="checkbox" name="grantedServices" th:value="${smartService.id}" />
+                    <span th:text="${smartService.name}" />
+                  </label>
+                </div>
               </div>
         </div>
       </div>
@@ -111,6 +124,19 @@
     M.FormSelect.init(document.querySelectorAll('select'), {});
 
     M.Modal.init(document.querySelectorAll('.modal'), {});
+
+    const scopeSelect = document.getElementById('scope-select');
+    const authServicesContainer = document.getElementById('authorized-services-container');
+
+    scopeSelect.addEventListener('change', (event) => {
+      if(event.target.value !== "GRANTED") {
+        authServicesContainer.classList.add('hiddendiv');
+        return;
+      }
+
+      authServicesContainer.classList.remove('hiddendiv');
+    });
+
   })();
 </script>
 </html>
