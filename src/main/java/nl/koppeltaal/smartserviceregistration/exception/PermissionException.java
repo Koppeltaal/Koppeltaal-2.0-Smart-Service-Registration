@@ -5,16 +5,23 @@ import java.util.UUID;
 /**
  * Custom exception that provides the actual role id to properly redirect with error reporting
  */
-public class RoleException extends RuntimeException {
+public class PermissionException extends RuntimeException {
 
   private final UUID roleId;
+  private final UUID permissionId;
 
-  public RoleException(UUID roleId, String message, Throwable e) {
+  public PermissionException(UUID roleId, String message, Throwable e, UUID permissionId) {
     super(message, e);
     this.roleId = roleId;
+    this.permissionId = permissionId;
   }
 
   public UUID getRoleId() {
     return roleId;
   }
+
+  public UUID getPermissionId() {
+    return permissionId;
+  }
+
 }

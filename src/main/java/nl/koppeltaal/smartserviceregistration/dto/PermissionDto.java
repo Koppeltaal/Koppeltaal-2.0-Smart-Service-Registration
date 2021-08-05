@@ -11,21 +11,32 @@ package nl.koppeltaal.smartserviceregistration.dto;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import nl.koppeltaal.smartserviceregistration.model.CrudOperation;
 import nl.koppeltaal.smartserviceregistration.model.FhirResourceType;
 import nl.koppeltaal.smartserviceregistration.model.Permission;
 import nl.koppeltaal.smartserviceregistration.model.PermissionScope;
 import nl.koppeltaal.smartserviceregistration.model.Role;
+import nl.koppeltaal.smartserviceregistration.model.SmartService;
 
 /**
  *
  */
 public class PermissionDto {
+	private UUID id;
 	private Role role;
 	private Set<UUID> grantedServices = new HashSet<>();
 	private FhirResourceType resourceType;
 	private CrudOperation operation;
 	private PermissionScope scope;
+
+	public UUID getId() {
+		return id;
+	}
+
+	public void setId(UUID id) {
+		this.id = id;
+	}
 
 	public Role getRole() {
 		return role;
@@ -81,11 +92,28 @@ public class PermissionDto {
 	public Permission toPermissionWithoutGrantedServices() {
 		final Permission permission = new Permission();
 
+		permission.setId(id);
 		permission.setRole(role);
 		permission.setResourceType(resourceType);
 		permission.setOperation(operation);
 		permission.setScope(scope);
 
 		return permission;
+	}
+
+	public static PermissionDto toPermissionDto(Permission permission) {
+		PermissionDto permissionDto = new PermissionDto();
+
+		permissionDto.setId(permission.getId());
+		permissionDto.setRole(permission.getRole());
+		permissionDto.setResourceType(permission.getResourceType());
+		permissionDto.setOperation(permission.getOperation());
+		permissionDto.setScope(permission.getScope());
+		permissionDto.setGrantedServices(permission.getGrantedServices().stream()
+				.map(SmartService::getId).collect(
+				Collectors.toSet())
+		);
+
+		return permissionDto;
 	}
 }

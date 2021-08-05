@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import nl.koppeltaal.smartserviceregistration.dto.PermissionDto;
-import nl.koppeltaal.smartserviceregistration.exception.RoleException;
+import nl.koppeltaal.smartserviceregistration.exception.PermissionException;
 import nl.koppeltaal.smartserviceregistration.model.Permission;
 import nl.koppeltaal.smartserviceregistration.model.Role;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
@@ -47,33 +47,51 @@ public class RoleService {
     return repository.save(role);
   }
 
-  public void addPermission(PermissionDto permissionDto, UUID roleId) {
+  public void addOrUpdatePermission(PermissionDto permissionDto, UUID roleId) {
 
     try {
-
-      final Permission permission = permissionDto.toPermissionWithoutGrantedServices();
+      Permission newPermission = getNewPermission(permissionDto, roleId);
 
       final Set<UUID> grantedServicesIds = permissionDto.getGrantedServices();
-
       if(!grantedServicesIds.isEmpty()) {
         final Set<SmartService> grantedServices = smartServiceRepository.findAllById(grantedServicesIds);
-        permission.setGrantedServices(grantedServices);
+        newPermission.setGrantedServices(grantedServices);
       }
 
+      permissionRepository.save(newPermission);
+    } catch (DataIntegrityViolationException e) {
+      throw new PermissionException(roleId, String.format(
+          "Er bestaat al een permissie voor resource [%s] en operation [%s]. Deze combinatie moet uniek zijn.",
+          permissionDto.getResourceType(), permissionDto.getOperation()), e, permissionDto.getId());
+    } catch (Exception e) {
+      throw new PermissionException(roleId, e.getMessage(), e, permissionDto.getId());
+    }
+  }
+
+  private Permission getNewPermission(PermissionDto permissionDto, UUID roleId) {
+
+    Permission newPermission = permissionDto.toPermissionWithoutGrantedServices();
+
+    // If it's an update, apply new fields that are allowed to change onto the previous version
+    if(permissionDto.getId() != null) {
+      final Permission previousPermission = permissionRepository.findById(permissionDto.getId())
+          .orElseThrow(() -> new IllegalArgumentException(
+              String.format("Cannot update permission with id [%s], not found",
+                  permissionDto.getId())));
+
+      previousPermission.setScope(newPermission.getScope());
+      previousPermission.setResourceType(newPermission.getResourceType());
+      previousPermission.setOperation(newPermission.getOperation());
+
+      newPermission = previousPermission;
+    } else {
+      // if it's a new permission, set the role
       final Role role = repository.findById(roleId)
           .orElseThrow(() -> new IllegalArgumentException("Unknown role id"));
-      permission.setRole(role);
-
-      permissionRepository.save(permission);
-
-      repository.save(role);
-    } catch (DataIntegrityViolationException e) {
-      throw new RoleException(roleId, String.format(
-          "Er bestaat al een permissie voor resource [%s] en operation [%s]. Deze combinatie moet uniek zijn.",
-          permissionDto.getResourceType(), permissionDto.getOperation()), e);
-    } catch (Exception e) {
-      throw new RoleException(roleId, e.getMessage(), e);
+      newPermission.setRole(role);
     }
+
+    return newPermission;
   }
 
   public void deletePermission(UUID permissionId) {
