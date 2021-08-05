@@ -11,18 +11,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping("status")
-public class SmartServiceStatusController {
+@RequestMapping("smartService")
+public class SmartServiceController {
 
   private final SmartServiceService smartServiceService;
 
-  public SmartServiceStatusController(SmartServiceService smartServiceService) {
+  public SmartServiceController(SmartServiceService smartServiceService) {
     this.smartServiceService = smartServiceService;
   }
 
-  @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  @PostMapping(value = "status", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
   public String registerNewServiceRequest(@RequestParam UUID id, @RequestParam SmartServiceStatus status, HttpSession session) {
     smartServiceService.updateSmartServiceStatus(id, status, (String) session.getAttribute("user"));
+
+    return "redirect:/";
+  }
+
+  @PostMapping(value = "name", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String registerNewServiceRequest(@RequestParam UUID id, @RequestParam String name, HttpSession session) {
+    smartServiceService.updateSmartServiceName(id, name, (String) session.getAttribute("user"));
 
     return "redirect:/";
   }

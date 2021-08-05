@@ -49,8 +49,8 @@ public class RegisterSmartServiceController {
   }
 
   @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  public String registerNewServiceRequest(@RequestParam String jwksEndpoint, @RequestParam String publicKey, HttpSession session) {
-    smartServiceService.registerNewService(jwksEndpoint, publicKey, (String) session.getAttribute("user"));
+  public String registerNewServiceRequest(@RequestParam String jwksEndpoint, @RequestParam String name, @RequestParam String publicKey, HttpSession session) {
+    smartServiceService.registerNewService(jwksEndpoint, name, publicKey, (String) session.getAttribute("user"));
     return "redirect:/";
   }
 

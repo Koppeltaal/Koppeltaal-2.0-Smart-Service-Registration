@@ -40,7 +40,7 @@ public class SmartServiceService {
     return repository.findById(id);
   }
 
-  public SmartService registerNewService(String jwksEndpoint, String publicKey, String currentUser) {
+  public SmartService registerNewService(String jwksEndpoint, String name, String publicKey, String currentUser) {
 
     final SmartService smartService = new SmartService();
 
@@ -56,6 +56,7 @@ public class SmartServiceService {
       smartService.setPublicKey(publicKey);
     }
 
+    smartService.setName(name);
     smartService.setCreatedBy(currentUser);
 
     try {
@@ -101,6 +102,18 @@ public class SmartServiceService {
         smartService.getStatus(), status);
 
     smartService.setStatus(status);
+    return repository.save(smartService);
+  }
+
+  public SmartService updateSmartServiceName(UUID id, String name, String user) {
+    final SmartService smartService = repository.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Unknown id"));
+
+    //WARN: lacking any form of security role check
+    LOG.info("User [{}] changed status of SmartService from [{}] to [{}].", user,
+        smartService.getName(), name);
+
+    smartService.setName(name);
     return repository.save(smartService);
   }
 

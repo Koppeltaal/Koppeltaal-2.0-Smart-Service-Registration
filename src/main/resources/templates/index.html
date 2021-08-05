@@ -8,6 +8,7 @@
   <table class="striped highlight">
     <thead>
     <tr>
+      <th>naam</th>
       <th>client_id</th>
       <th>status</th>
       <th>aanvraagdatum</th>
@@ -19,9 +20,20 @@
     </thead>
     <tbody>
     <tr th:each="smartService, smartServiceStat : ${smartServices}" th:attr="data-service-id=${smartService.id}">
-      <td th:text="${smartService.clientId}"/>
       <td>
-        <form method="post" th:action="${'/status'}">
+        <form method="post" action="/smartService/name">
+          <input type="hidden" name="id" th:value="${smartService.id}" />
+          <div class="file-field input-field">
+            <button class="btn  btn-small grey lighten-3 black-text" type="submit"><i class="material-icons">save</i></button>
+            <div class="file-path-wrapper">
+              <input type="text" name="name" th:value="${smartService.name}" />
+            </div>
+          </div>
+
+        </form>
+      </td>
+      <td>
+        <form method="post" action="/smartService/status">
           <input type="hidden" name="id" th:value="${smartService.id}">
           <select name="status" onchange="this.form.submit()">
             <option value="PENDING" th:selected='${#strings.equals(smartService.status, "PENDING")}'>😴 Pending</option>

@@ -46,6 +46,8 @@ public class SmartService extends DbEntity {
   @Column(name = "public_key", length = 512)
   private String publicKey;
 
+  private String name;
+
   public Role getRole() {
     return role;
   }
@@ -86,6 +88,14 @@ public class SmartService extends DbEntity {
     this.publicKey = publicKey;
   }
 
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
   @Override
   public String toString() {
     return "SmartService{" +
@@ -94,6 +104,7 @@ public class SmartService extends DbEntity {
         ", status=" + status +
         ", jwksEndpoint=" + jwksEndpoint +
         ", publicKey='" + publicKey + '\'' +
+        ", name='" + name + '\'' +
         "} " + super.toString();
   }
 }
