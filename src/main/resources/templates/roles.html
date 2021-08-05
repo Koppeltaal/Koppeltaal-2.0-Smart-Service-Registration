@@ -16,14 +16,14 @@
     </thead>
     <tbody>
     <tr th:if="${#lists.isEmpty(roles)}">
-      <td colspan="3">Geen rollen aangemaakt</td>
+      <td colspan="4">Geen rollen aangemaakt</td>
     </tr>
     <tr th:if="${not #lists.isEmpty(roles)}" th:each="role, roleStat : ${roles}" th:attr="data-service-id=${role.id}">
       <td th:text="${role.name}"/>
       <td th:text="${#temporals.format(role.createdOn, 'dd-MM-yyyy HH:mm')}"/></td>
       <td th:text="${#lists.size(role.permissions)}"/>
       <td class="edit-authorizations">
-        <a th:href="@{/roles/edit(id=${role.id})}"><i class="material-icons">edit</i></a>
+        <a class="btn amber" th:href="@{/roles/edit(id=${role.id})}"><i class="material-icons">edit</i></a>
       </td>
     </tr>
     </tbody>

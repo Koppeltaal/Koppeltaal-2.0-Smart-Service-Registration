@@ -5,7 +5,7 @@
 <body>
 <nav th:replace="fragment/header :: header(selected='index')"></nav>
 <div class="container">
-  <table class="striped highlight">
+  <table id="smart-services-overview" class="striped highlight">
     <thead>
     <tr>
       <th>Naam</th>
@@ -25,7 +25,7 @@
         <form method="post" action="/smartService/name">
           <input type="hidden" name="id" th:value="${smartService.id}" />
           <div class="file-field input-field">
-            <button class="btn  btn-small grey lighten-3 black-text" type="submit"><i class="material-icons">save</i></button>
+            <button class="btn amber tooltipped" type="submit" data-position="bottom" data-tooltip="Sla naam op"><i class="material-icons">save</i></button>
             <div class="file-path-wrapper">
               <input type="text" name="name" th:value="${smartService.name}" />
             </div>
@@ -57,7 +57,7 @@
       <td th:text="${smartService.jwksEndpoint}"/>
       <td th:text="${smartService.publicKey}"/>
       <td class="delete-service" th:attr="data-service-id=${smartService.id}, data-client-id=${smartService.clientId}">
-        <i class="material-icons">delete</i>
+        <div class="btn amber"><i class="material-icons">delete</i></div>
       </td>
     </tr>
     </tbody>
@@ -71,6 +71,8 @@
   (function() {
     // Initialize materialize select
     M.FormSelect.init(document.querySelectorAll('select'), {});
+
+    M.Tooltip.init(document.querySelectorAll('.tooltipped'), {});
 
     document.querySelectorAll('.delete-service').forEach(deleteInput => {
       const id = deleteInput.getAttribute('data-service-id')

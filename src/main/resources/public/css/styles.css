@@ -65,13 +65,19 @@ html, head, body, .container {
 
 }
 
-table {
+table#smart-services-overview {
     table-layout: fixed;
     width: 100%;
 }
+
 td {
     overflow-x: auto;
+    overflow-y: visible;
     white-space: nowrap;
+}
+
+form button[type="submit"] {
+    cursor: pointer;
 }
 
 #add-permission-modal {

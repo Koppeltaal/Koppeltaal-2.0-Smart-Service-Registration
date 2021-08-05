@@ -32,7 +32,7 @@
     </thead>
     <tbody>
     <tr th:if="${#lists.isEmpty(role.permissions)}">
-      <td colspan="3">Geen permissies toegekend</td>
+      <td colspan="4">Geen permissies toegekend</td>
     </tr>
     <tr th:if="${not #lists.isEmpty(role.permissions)}" th:each="permission, permissionStat : ${role.permissions}">
       <td th:text="${permission.resourceType}" />
@@ -40,7 +40,7 @@
       <td th:text="${permission.scope}" />
       <td>
         <form th:action="@{/roles/deletePermission(permissionId=${permission.id}, roleId=${role.id})}" method="post">
-          <button type="submit"><i class="material-icons">delete</i></button>
+          <button class="btn amber" type="submit"><i class="material-icons">delete</i></button>
         </form>
       </td>
     </tr>
