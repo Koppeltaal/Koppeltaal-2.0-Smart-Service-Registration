@@ -10,9 +10,10 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Optional;
 import java.util.UUID;
 import nl.koppeltaal.smartserviceregistration.exception.SmartServiceRegistrationException;
+import nl.koppeltaal.smartserviceregistration.model.Role;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import nl.koppeltaal.smartserviceregistration.model.SmartServiceStatus;
-import nl.koppeltaal.smartserviceregistration.repository.PermissionRepository;
+import nl.koppeltaal.smartserviceregistration.repository.RoleRepository;
 import nl.koppeltaal.smartserviceregistration.repository.SmartServiceRepository;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
@@ -27,13 +28,12 @@ public class SmartServiceService {
   private final static Logger LOG = LoggerFactory.getLogger(SmartServiceService.class);
 
   private final SmartServiceRepository repository;
-
-  private final PermissionRepository permissionRepository;
+  private final RoleRepository roleRepository;
 
   public SmartServiceService(SmartServiceRepository repository,
-      PermissionRepository permissionRepository) {
+      RoleRepository roleRepository) {
     this.repository = repository;
-    this.permissionRepository = permissionRepository;
+    this.roleRepository = roleRepository;
   }
 
   public Optional<SmartService> findById(UUID id) {
@@ -114,6 +114,21 @@ public class SmartServiceService {
         smartService.getName(), name);
 
     smartService.setName(name);
+    return repository.save(smartService);
+  }
+
+  public SmartService updateSmartServiceRole(UUID id, UUID roleId, String user) {
+    final SmartService smartService = repository.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Unknown id"));
+
+    final Role role = roleRepository.findById(roleId)
+        .orElseThrow(() -> new IllegalArgumentException("Unknown role id"));
+
+    //WARN: lacking any form of security role check
+    LOG.info("User [{}] changed status of SmartService from [{}] to [{}].", user,
+        smartService.getRole(), role);
+
+    smartService.setRole(role);
     return repository.save(smartService);
   }
 

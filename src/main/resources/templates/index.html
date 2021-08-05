@@ -8,13 +8,14 @@
   <table class="striped highlight">
     <thead>
     <tr>
-      <th>naam</th>
+      <th>Naam</th>
       <th>client_id</th>
-      <th>status</th>
-      <th>aanvraagdatum</th>
-      <th>requester</th>
-      <th>endpoint</th>
-      <th>public key</th>
+      <th>Rol</th>
+      <th>Status</th>
+      <th>Aanvraagdatum</th>
+      <th>Requester</th>
+      <th>Endpoint</th>
+      <th>Public Key</th>
       <th></th>
     </tr>
     </thead>
@@ -29,7 +30,15 @@
               <input type="text" name="name" th:value="${smartService.name}" />
             </div>
           </div>
-
+        </form>
+      </td>
+      <td>
+        <form method="post" action="/smartService/role">
+          <input type="hidden" name="id" th:value="${smartService.id}">
+          <select name="roleId" onchange="this.form.submit()">
+            <option value="null">Geen rol</option>
+            <option th:value="${role.id}" th:text="${role.name}" th:each="role : ${roles}" th:selected="${smartService.role?.id == role.id}"></option>
+          </select>
         </form>
       </td>
       <td>

@@ -33,4 +33,11 @@ public class SmartServiceController {
 
     return "redirect:/";
   }
+
+  @PostMapping(value = "role", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String registerNewServiceRequest(@RequestParam UUID id, @RequestParam UUID roleId, HttpSession session) {
+    smartServiceService.updateSmartServiceRole(id, roleId, (String) session.getAttribute("user"));
+
+    return "redirect:/";
+  }
 }

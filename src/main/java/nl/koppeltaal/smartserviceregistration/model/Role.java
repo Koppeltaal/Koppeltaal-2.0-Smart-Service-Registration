@@ -9,6 +9,7 @@ package nl.koppeltaal.smartserviceregistration.model;
 
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -19,7 +20,7 @@ public class Role extends DbEntity {
 
   private String name;
 
-  @OneToMany(mappedBy = "role")
+  @OneToMany(mappedBy = "role", cascade = CascadeType.REMOVE)
   private Set<Permission> permissions = new HashSet<>();
 
   public String getName() {
