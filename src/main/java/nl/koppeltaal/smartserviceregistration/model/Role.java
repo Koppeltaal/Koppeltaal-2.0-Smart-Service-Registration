@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 @Entity
@@ -21,6 +22,7 @@ public class Role extends DbEntity {
   private String name;
 
   @OneToMany(mappedBy = "role", cascade = CascadeType.REMOVE)
+  @OrderBy("resourceType")
   private Set<Permission> permissions = new HashSet<>();
 
   public String getName() {

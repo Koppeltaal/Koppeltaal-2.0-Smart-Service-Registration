@@ -46,7 +46,7 @@ public class RoleController {
   }
 
   @PostMapping
-  public String saveRole(@ModelAttribute Role role, Model model, HttpSession session) {
+  public String saveRole(@ModelAttribute Role role) {
 
     Role persistedRole = roleService.save(role);
 
@@ -61,10 +61,6 @@ public class RoleController {
     final Role role = roleService.findById(roleId)
         .orElseThrow(() -> new IllegalArgumentException("Unknown smart service id"));
     model.addAttribute("role", role);
-
-    final PermissionDto permission = new PermissionDto();
-    permission.setRole(role);
-    model.addAttribute("newPermission", permission);
 
     model.addAttribute("smartServices", smartServiceService.findAll());
 

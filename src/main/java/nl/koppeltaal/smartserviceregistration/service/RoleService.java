@@ -1,5 +1,6 @@
 package nl.koppeltaal.smartserviceregistration.service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -34,8 +35,7 @@ public class RoleService {
     this.smartServiceRepository = smartServiceRepository;
   }
 
-
-  public Iterable<Role> findAll() {
+  public List<Role> findAll() {
     return repository.findAll();
   }
 

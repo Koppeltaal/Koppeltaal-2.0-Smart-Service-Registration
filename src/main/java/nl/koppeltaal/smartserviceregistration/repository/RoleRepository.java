@@ -7,9 +7,12 @@
  */
 package nl.koppeltaal.smartserviceregistration.repository;
 
+import java.util.List;
 import java.util.UUID;
 import nl.koppeltaal.smartserviceregistration.model.Role;
 import org.springframework.data.repository.CrudRepository;
 
 public interface RoleRepository extends CrudRepository<Role, UUID> {
+
+  List<Role> findAll();
 }

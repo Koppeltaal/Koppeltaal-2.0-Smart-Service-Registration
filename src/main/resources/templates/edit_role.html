@@ -33,7 +33,7 @@
     </thead>
     <tbody>
     <tr th:if="${#lists.isEmpty(role.permissions)}">
-      <td colspan="4">Geen permissies toegekend</td>
+      <td colspan="5">Geen permissies toegekend</td>
     </tr>
     <tr th:if="${not #lists.isEmpty(role.permissions)}" th:each="permission, permissionStat : ${role.permissions}">
       <td th:text="${permission.resourceType}" />
