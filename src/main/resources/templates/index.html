@@ -16,7 +16,7 @@
       <th>Requester</th>
       <th>Endpoint</th>
       <th>Public Key</th>
-      <th></th>
+      <th>Delete</th>
     </tr>
     </thead>
     <tbody>
@@ -32,11 +32,12 @@
           </div>
         </form>
       </td>
+      <td th:text="${smartService.clientId}"/>
       <td>
         <form method="post" action="/smartService/role">
           <input type="hidden" name="id" th:value="${smartService.id}">
           <select name="roleId" onchange="this.form.submit()">
-            <option value="null">Geen rol</option>
+            <option th:if="${smartService.role == null}" value="null">Geen rol</option>
             <option th:value="${role.id}" th:text="${role.name}" th:each="role : ${roles}" th:selected="${smartService.role?.id == role.id}"></option>
           </select>
         </form>
