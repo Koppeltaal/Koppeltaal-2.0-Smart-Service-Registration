@@ -30,6 +30,7 @@ public class LoggedInInterceptor implements HandlerInterceptor {
 
       if(!StringUtils.equals(authorizationEndpointToken, authToken)) {
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        return false;
       } else {
         return HandlerInterceptor.super.preHandle(request, response, handler);
       }

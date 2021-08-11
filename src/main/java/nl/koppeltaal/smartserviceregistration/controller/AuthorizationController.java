@@ -27,6 +27,7 @@ public class AuthorizationController {
     final Iterable<SmartService> smartServices = smartServiceService.findAll();
 
     final List<AuthorizationDto> result = StreamSupport.stream(smartServices.spliterator(), false)
+        .filter(smartService -> smartService.getRole() != null)
         .map((smartService -> {
           final List<PermissionDto> permissionDtos = smartService.getRole().getPermissions()
               .stream()
