@@ -21,7 +21,7 @@ public class LoggedInInterceptor implements HandlerInterceptor {
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
     final String path = request.getServletPath();
-    if("/login".equals(path) || "/code_response".equals(path)) {
+    if("/login".equals(path) || "/code_response".equals(path) || "/.well-known/jwks.json".equals(path)) {
       return HandlerInterceptor.super.preHandle(request, response, handler);
 
     // accessed by applications, using a "secret" to approve the request
