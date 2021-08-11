@@ -9,4 +9,5 @@ import org.springframework.data.repository.CrudRepository;
 public interface SmartServiceRepository extends CrudRepository<SmartService, UUID> {
   List<SmartService> findByOrderByCreatedOnDesc();
   Set<SmartService> findAllById(Iterable<UUID> ids);
+  Set<SmartService> findAllByFhirStoreDeviceIdIsNull();
 }

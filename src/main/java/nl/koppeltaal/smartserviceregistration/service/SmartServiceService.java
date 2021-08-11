@@ -1,5 +1,6 @@
 package nl.koppeltaal.smartserviceregistration.service;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyFactory;
@@ -7,16 +8,23 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
+import javax.annotation.PostConstruct;
 import nl.koppeltaal.smartserviceregistration.exception.SmartServiceRegistrationException;
 import nl.koppeltaal.smartserviceregistration.model.Role;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import nl.koppeltaal.smartserviceregistration.model.SmartServiceStatus;
 import nl.koppeltaal.smartserviceregistration.repository.RoleRepository;
 import nl.koppeltaal.smartserviceregistration.repository.SmartServiceRepository;
+import nl.koppeltaal.spring.boot.starter.smartservice.service.fhir.DeviceFhirClientService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.Device.DeviceDeviceNameComponent;
+import org.hl7.fhir.r4.model.Device.FHIRDeviceStatus;
+import org.hl7.fhir.r4.model.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -29,11 +37,51 @@ public class SmartServiceService {
 
   private final SmartServiceRepository repository;
   private final RoleRepository roleRepository;
+  private final DeviceFhirClientService deviceFhirClientService;
 
   public SmartServiceService(SmartServiceRepository repository,
-      RoleRepository roleRepository) {
+      RoleRepository roleRepository,
+      DeviceFhirClientService deviceFhirClientService) {
     this.repository = repository;
     this.roleRepository = roleRepository;
+    this.deviceFhirClientService = deviceFhirClientService;
+  }
+
+  @PostConstruct
+  public void ensureDevices() {
+
+    repository.findAllByFhirStoreDeviceIdIsNull()
+        .forEach(this::ensureDeviceForASmartService);
+  }
+
+  /**
+   * Every SMART service has its own client_id. The client_id could change over time, but the application
+   * itself should remain consistent. Therefore, whenever a SMART service is created, the service pushes
+   * a Device record to the FHIR store. The Device has the client_id set as an identifier.
+   */
+  private SmartService ensureDeviceForASmartService(SmartService smartService) {
+    final DeviceDeviceNameComponent name = new DeviceDeviceNameComponent();
+    name.setName(smartService.getName());
+
+    Device device = new Device();
+    device.setDeviceName(Collections.singletonList(name));
+    device.setStatus(FHIRDeviceStatus.ACTIVE);
+
+    final Identifier clientIdIdentifier = new Identifier();
+    clientIdIdentifier.setSystem("https://koppeltaal.nl/client_id");
+    clientIdIdentifier.setValue(smartService.getClientId());
+    device.addIdentifier(clientIdIdentifier);
+
+    try {
+      device = deviceFhirClientService.storeResource(device);
+
+      smartService.setFhirStoreDeviceId(device.getIdElement().toUnqualifiedVersionless().getValue());
+      return repository.save(smartService);
+    } catch (IOException e) {
+      LOG.warn("Failed to store device for smart service [{}]", smartService);
+    }
+
+    return null;
   }
 
   public Optional<SmartService> findById(UUID id) {
@@ -60,7 +108,7 @@ public class SmartServiceService {
     smartService.setCreatedBy(currentUser);
 
     try {
-      return repository.save(smartService);
+      return ensureDeviceForASmartService(smartService);  //also saves the smartService
     } catch (DataIntegrityViolationException e) {
       throw new SmartServiceRegistrationException(jwksEndpoint, jwksEndpoint + " is reeds geregistreerd.", e);
     }

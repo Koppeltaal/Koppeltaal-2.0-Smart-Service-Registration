@@ -1,8 +1,6 @@
 package nl.koppeltaal.smartserviceregistration.model;
 
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,12 +9,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * This entity resembles a <a href="https://hl7.org/fhir/uv/bulkdata/authorization/index.html">SMART Backend Service</a>.
@@ -47,6 +41,9 @@ public class SmartService extends DbEntity {
   private String publicKey;
 
   private String name;
+
+  @Column(name = "fhir_store_device_id")
+  private String fhirStoreDeviceId;
 
   public Role getRole() {
     return role;
@@ -96,6 +93,14 @@ public class SmartService extends DbEntity {
     this.name = name;
   }
 
+  public String getFhirStoreDeviceId() {
+    return fhirStoreDeviceId;
+  }
+
+  public void setFhirStoreDeviceId(String fhirStoreDeviceId) {
+    this.fhirStoreDeviceId = fhirStoreDeviceId;
+  }
+
   @Override
   public String toString() {
     return "SmartService{" +
@@ -105,6 +110,7 @@ public class SmartService extends DbEntity {
         ", jwksEndpoint=" + jwksEndpoint +
         ", publicKey='" + publicKey + '\'' +
         ", name='" + name + '\'' +
+        ", fhirStoreDeviceId='" + fhirStoreDeviceId + '\'' +
         "} " + super.toString();
   }
 }
