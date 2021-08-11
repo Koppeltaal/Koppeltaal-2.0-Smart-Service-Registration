@@ -2,6 +2,7 @@ FROM maven:3.6.3-jdk-11 AS build
 
 ADD pom.xml /pom.xml
 ADD src /src
+ADD ci_settings.xml /ci_settings.xml
 
 #Propagate username and password (PAT) for GitHub
 ARG SETTINGS_XML_USERNAME
