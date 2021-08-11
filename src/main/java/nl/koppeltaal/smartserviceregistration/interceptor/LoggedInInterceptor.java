@@ -25,7 +25,7 @@ public class LoggedInInterceptor implements HandlerInterceptor {
       return HandlerInterceptor.super.preHandle(request, response, handler);
 
     // accessed by applications, using a "secret" to approve the request
-    } else if("/authorization".equals(path)) {
+    } else if(path.startsWith("/authorization")) {
       final String authToken = request.getHeader("X-Auth-Token");
 
       if(!StringUtils.equals(authorizationEndpointToken, authToken)) {

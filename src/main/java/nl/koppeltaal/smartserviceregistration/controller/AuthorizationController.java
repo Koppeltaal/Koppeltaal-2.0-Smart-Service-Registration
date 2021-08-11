@@ -8,6 +8,7 @@ import nl.koppeltaal.smartserviceregistration.dto.PermissionDto;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import nl.koppeltaal.smartserviceregistration.service.SmartServiceService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,6 +43,11 @@ public class AuthorizationController {
         }))
         .collect(Collectors.toList());
     return result;
+  }
+
+  @PostMapping("ensure_devices")
+  public void ensureDevices()  {
+    smartServiceService.ensureDevices();
   }
 
 }

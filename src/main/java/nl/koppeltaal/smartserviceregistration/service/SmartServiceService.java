@@ -11,7 +11,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
-import javax.annotation.PostConstruct;
 import nl.koppeltaal.smartserviceregistration.exception.SmartServiceRegistrationException;
 import nl.koppeltaal.smartserviceregistration.model.Role;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
@@ -47,7 +46,6 @@ public class SmartServiceService {
     this.deviceFhirClientService = deviceFhirClientService;
   }
 
-  @PostConstruct
   public void ensureDevices() {
 
     repository.findAllByFhirStoreDeviceIdIsNull()
