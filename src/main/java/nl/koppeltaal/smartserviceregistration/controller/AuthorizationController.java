@@ -37,7 +37,7 @@ public class AuthorizationController {
               }))
               .collect(Collectors.toList());
 
-          return new AuthorizationDto(smartService.getClientId(), permissionDtos);
+          return new AuthorizationDto(smartService.getClientId(), smartService.getFhirStoreDeviceId(), permissionDtos);
         }))
         .collect(Collectors.toList());
     return result;

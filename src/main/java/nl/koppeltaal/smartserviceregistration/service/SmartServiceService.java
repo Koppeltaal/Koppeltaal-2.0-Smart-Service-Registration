@@ -75,7 +75,7 @@ public class SmartServiceService {
     try {
       device = deviceFhirClientService.storeResource(device);
 
-      smartService.setFhirStoreDeviceId(device.getIdElement().toUnqualifiedVersionless().getValue());
+      smartService.setFhirStoreDeviceId(device.getIdElement().getIdPart());
       return repository.save(smartService);
     } catch (IOException e) {
       LOG.warn("Failed to store device for smart service [{}]", smartService);
