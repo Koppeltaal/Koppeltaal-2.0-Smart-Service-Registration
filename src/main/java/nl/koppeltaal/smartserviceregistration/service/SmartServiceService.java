@@ -11,6 +11,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
+import javax.annotation.PostConstruct;
 import nl.koppeltaal.smartserviceregistration.exception.SmartServiceRegistrationException;
 import nl.koppeltaal.smartserviceregistration.model.Role;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
@@ -46,6 +47,20 @@ public class SmartServiceService {
     this.deviceFhirClientService = deviceFhirClientService;
   }
 
+  @PostConstruct
+  public void init() {
+
+    if(repository.count() == 0) {
+      final SmartService smartService = new SmartService();
+      smartService.setName("Smart Registration Service - Domain Admin");
+      smartService.setCreatedBy("system");
+      repository.save(smartService);
+
+      //IMPORTANT: Should manually call /authorization/ensure_devices after the client_id is
+      //configured  in the FHIR store
+    }
+  }
+
   public void ensureDevices() {
 
     repository.findAllByFhirStoreDeviceIdIsNull()
@@ -76,7 +91,7 @@ public class SmartServiceService {
       smartService.setFhirStoreDeviceId(device.getIdElement().getIdPart());
       return repository.save(smartService);
     } catch (IOException e) {
-      LOG.warn("Failed to store device for smart service [{}]", smartService);
+      LOG.warn(String.format("Failed to store device for smart service [%s]", smartService), e);
     }
 
     return null;
@@ -98,7 +113,7 @@ public class SmartServiceService {
       }
     }
 
-    if(StringUtils.isNotBlank(publicKey) &&  isValidPublicKey(publicKey)) {
+    if(StringUtils.isNotBlank(publicKey) && isValidPublicKey(publicKey)) {
       smartService.setPublicKey(publicKey);
     }
 

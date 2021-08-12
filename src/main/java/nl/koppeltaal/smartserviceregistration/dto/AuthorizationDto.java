@@ -4,13 +4,12 @@ import java.util.List;
 
 public class AuthorizationDto {
   private final String clientId;
-  private final String deviceReference;
+  private final String deviceId;
   private final List<PermissionDto> permissions;
 
-  public AuthorizationDto(String clientId, String deviceReference,
-      List<PermissionDto> permissions) {
+  public AuthorizationDto(String clientId, String deviceId, List<PermissionDto> permissions) {
     this.clientId = clientId;
-    this.deviceReference = deviceReference;
+    this.deviceId = deviceId;
     this.permissions = permissions;
   }
 
@@ -22,7 +21,7 @@ public class AuthorizationDto {
     return permissions;
   }
 
-  public String getDeviceReference() {
-    return deviceReference;
+  public String getDeviceId() {
+    return deviceId;
   }
 }

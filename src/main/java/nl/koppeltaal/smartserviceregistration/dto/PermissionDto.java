@@ -25,6 +25,7 @@ import nl.koppeltaal.smartserviceregistration.model.SmartService;
 public class PermissionDto {
 	private UUID id;
 	private Role role;
+	private Set<String> grantedDeviceIds = new HashSet<>();
 	private Set<UUID> grantedServices = new HashSet<>();
 	private FhirResourceType resourceType;
 	private CrudOperation operation;
@@ -78,15 +79,12 @@ public class PermissionDto {
 		this.scope = scope;
 	}
 
-	@Override
-	public String toString() {
-		return "PermissionDto{" +
-				"role=" + role +
-				", grantedServices=" + grantedServices +
-				", resourceType=" + resourceType +
-				", operation=" + operation +
-				", scope=" + scope +
-				'}';
+	public Set<String> getGrantedDeviceIds() {
+		return grantedDeviceIds;
+	}
+
+	public void setGrantedDeviceIds(Set<String> grantedDeviceIds) {
+		this.grantedDeviceIds = grantedDeviceIds;
 	}
 
 	public Permission toPermissionWithoutGrantedServices() {
@@ -101,6 +99,19 @@ public class PermissionDto {
 		return permission;
 	}
 
+	@Override
+	public String toString() {
+		return "PermissionDto{" +
+				"id=" + id +
+				", role=" + role +
+				", grantedDeviceIds=" + grantedDeviceIds +
+				", grantedServices=" + grantedServices +
+				", resourceType=" + resourceType +
+				", operation=" + operation +
+				", scope=" + scope +
+				'}';
+	}
+
 	public static PermissionDto toPermissionDto(Permission permission) {
 		PermissionDto permissionDto = new PermissionDto();
 
@@ -112,6 +123,10 @@ public class PermissionDto {
 		permissionDto.setGrantedServices(permission.getGrantedServices().stream()
 				.map(SmartService::getId).collect(
 				Collectors.toSet())
+		);
+		permissionDto.setGrantedDeviceIds(permission.getGrantedServices().stream()
+				.map(SmartService::getFhirStoreDeviceId).collect(
+						Collectors.toSet())
 		);
 
 		return permissionDto;
