@@ -17,5 +17,6 @@ public enum FhirResourceType {
   ENDPOINT,
   ORGANIZATION,
   DEVICE,
-  SUBSCRIPTION;
+  SUBSCRIPTION,
+  SEARCH_PARAMETER;
 }

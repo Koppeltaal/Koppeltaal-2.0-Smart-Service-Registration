@@ -39,6 +39,7 @@
           <option th:selected="${#strings.equals(permission.resourceType, 'ORGANIZATION')}" value="ORGANIZATION">Organization</option>
           <option th:selected="${#strings.equals(permission.resourceType, 'DEVICE')}" value="DEVICE">Device</option>
           <option th:selected="${#strings.equals(permission.resourceType, 'SUBSCRIPTION')}" value="SUBSCRIPTION">Subscription</option>
+          <option th:selected="${#strings.equals(permission.resourceType, 'SEARCH_PARAMETER')}" value="SEARCH_PARAMETER">SearchParameter</option>
         </select>
         <label>Resource</label>
       </div>
