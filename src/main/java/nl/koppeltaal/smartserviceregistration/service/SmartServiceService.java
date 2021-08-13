@@ -32,6 +32,7 @@ import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Device.DeviceDeviceNameComponent;
 import org.hl7.fhir.r4.model.Device.FHIRDeviceStatus;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -77,7 +78,7 @@ public class SmartServiceService {
 
       Set<Permission> permissions = new HashSet<>();
 
-      for (FhirResourceType resourceType : FhirResourceType.values()) {
+      for (ResourceType resourceType : ResourceType.values()) {
         for (CrudOperation operation : CrudOperation.values()) {
           final Permission permission = new Permission();
 

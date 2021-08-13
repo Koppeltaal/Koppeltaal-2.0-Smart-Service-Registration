@@ -20,6 +20,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import org.hl7.fhir.r4.model.ResourceType;
 
 @Entity
 @Table(name = "permission", uniqueConstraints = {
@@ -41,7 +42,7 @@ public class Permission extends DbEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "resource_type")
-  private FhirResourceType resourceType;
+  private ResourceType resourceType;
 
   @Enumerated(EnumType.STRING)
   private CrudOperation operation;
@@ -57,11 +58,11 @@ public class Permission extends DbEntity {
     this.role = role;
   }
 
-  public FhirResourceType getResourceType() {
+  public ResourceType getResourceType() {
     return resourceType;
   }
 
-  public void setResourceType(FhirResourceType resourceType) {
+  public void setResourceType(ResourceType resourceType) {
     this.resourceType = resourceType;
   }
 

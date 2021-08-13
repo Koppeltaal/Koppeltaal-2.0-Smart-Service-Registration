@@ -18,6 +18,7 @@ import nl.koppeltaal.smartserviceregistration.model.Permission;
 import nl.koppeltaal.smartserviceregistration.model.PermissionScope;
 import nl.koppeltaal.smartserviceregistration.model.Role;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
+import org.hl7.fhir.r4.model.ResourceType;
 
 /**
  *
@@ -27,7 +28,7 @@ public class PermissionDto {
 	private Role role;
 	private Set<String> grantedDeviceIds = new HashSet<>();
 	private Set<UUID> grantedServices = new HashSet<>();
-	private FhirResourceType resourceType;
+	private ResourceType resourceType;
 	private CrudOperation operation;
 	private PermissionScope scope;
 
@@ -55,11 +56,11 @@ public class PermissionDto {
 		this.grantedServices = grantedServices;
 	}
 
-	public FhirResourceType getResourceType() {
+	public ResourceType getResourceType() {
 		return resourceType;
 	}
 
-	public void setResourceType(FhirResourceType resourceType) {
+	public void setResourceType(ResourceType resourceType) {
 		this.resourceType = resourceType;
 	}
 

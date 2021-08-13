@@ -8,7 +8,10 @@
 
 package nl.koppeltaal.smartserviceregistration.controller;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpSession;
 import nl.koppeltaal.smartserviceregistration.dto.PermissionDto;
 import nl.koppeltaal.smartserviceregistration.exception.PermissionException;
@@ -17,6 +20,7 @@ import nl.koppeltaal.smartserviceregistration.model.Role;
 import nl.koppeltaal.smartserviceregistration.repository.PermissionRepository;
 import nl.koppeltaal.smartserviceregistration.service.RoleService;
 import nl.koppeltaal.smartserviceregistration.service.SmartServiceService;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -54,6 +58,7 @@ public class PermissionController {
     final PermissionDto newPermission = new PermissionDto();
     newPermission.setRole(role);
 
+    model.addAttribute("resourceTypes", getResourceTypeMap());
     model.addAttribute("permission", newPermission);
     model.addAttribute("edit", false);
     model.addAttribute("smartServices", smartServiceService.findAll());
@@ -69,6 +74,7 @@ public class PermissionController {
     final Permission permission = repository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Unknown permission id"));
 
+    model.addAttribute("resourceTypes", getResourceTypeMap());
     model.addAttribute("permission", PermissionDto.toPermissionDto(permission));
     model.addAttribute("edit", true);
     model.addAttribute("smartServices", smartServiceService.findAll());
@@ -101,6 +107,11 @@ public class PermissionController {
 
     return permissionId != null ? editPermission(permissionId, model, session) : newPermission(
         exception.getRoleId(), model, session);
+  }
+
+  private Map<String, String> getResourceTypeMap() {
+    return Arrays.stream(ResourceType.values())
+        .collect(Collectors.toMap(Enum::name,  resourceType -> ""));
   }
 
 }

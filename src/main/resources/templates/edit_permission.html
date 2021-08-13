@@ -27,23 +27,14 @@
     <input type="hidden" name="id" th:value="${permission.id}" />
     <div class="row">
       <div class="input-field col s12">
-        <select id="resource-type" name="resourceType">
-          <option value="" disabled th:selected="${not edit}">Kies een resource</option>
-          <option th:selected="${#strings.equals(permission.resourceType, 'ACTIVITY_DEFINITION')}" value="ACTIVITY_DEFINITION">ActivityDefinition</option>
-          <option th:selected="${#strings.equals(permission.resourceType, 'CARE_TEAM')}" value="CARE_TEAM">CareTeam</option>
-          <option th:selected="${#strings.equals(permission.resourceType, 'TASK')}" value="TASK">Task</option>
-          <option th:selected="${#strings.equals(permission.resourceType, 'PATIENT')}" value="PATIENT">Patient</option>
-          <option th:selected="${#strings.equals(permission.resourceType, 'PRACTITIONER')}" value="PRACTITIONER">Practitioner</option>
-          <option th:selected="${#strings.equals(permission.resourceType, 'RELATED_PERSON')}" value="RELATED_PERSON">RelatedPerson</option>
-          <option th:selected="${#strings.equals(permission.resourceType, 'ENDPOINT')}" value="ENDPOINT">Endpoint</option>
-          <option th:selected="${#strings.equals(permission.resourceType, 'ORGANIZATION')}" value="ORGANIZATION">Organization</option>
-          <option th:selected="${#strings.equals(permission.resourceType, 'DEVICE')}" value="DEVICE">Device</option>
-          <option th:selected="${#strings.equals(permission.resourceType, 'SUBSCRIPTION')}" value="SUBSCRIPTION">Subscription</option>
-          <option th:selected="${#strings.equals(permission.resourceType, 'SEARCH_PARAMETER')}" value="SEARCH_PARAMETER">SearchParameter</option>
-        </select>
-        <label>Resource</label>
+        <i class="material-icons prefix">find_in_page</i>
+        <input name="resourceType" th:value="${permission.resourceType}" type="text" id="resource-input" class="autocomplete">
+        <label for="resource-input">Resource</label>
       </div>
+    </div>
+    <div class="row">
       <div class="input-field col s12">
+        <i class="material-icons prefix">http</i>
         <select name="operation">
           <option value="" disabled th:selected="${not edit}">Kies een operatie</option>
           <option th:selected="${#strings.equals(permission.operation, 'CREATE')}" value="CREATE">Create</option>
@@ -53,7 +44,10 @@
         </select>
         <label>CRUD</label>
       </div>
+    </div>
+    <div class="row">
       <div class="input-field col s12">
+        <i class="material-icons prefix">filter_list</i>
         <select id="scope-select" name="scope">
           <option value="" disabled th:selected="${not edit}">Kies een scope</option>
           <option th:selected="${#strings.equals(permission.scope, 'ALL')}" value="ALL">All</option>
@@ -84,12 +78,16 @@
 
 <!--JavaScript at end of body for optimized loading-->
 <script type="text/javascript" src="/js/materialize.min.js"></script>
-<script>
+<script th:inline="javascript">
   (function() {
     // Initialize materialize select
     M.FormSelect.init(document.querySelectorAll('select'), {});
 
     M.Modal.init(document.querySelectorAll('.modal'), {});
+
+    M.Autocomplete.init(document.getElementById('resource-input'), {
+      data: /*[[${resourceTypes}]]*/ {}
+    })
 
     const scopeSelect = document.getElementById('scope-select');
     const authServicesContainer = document.getElementById('authorized-services-container');
