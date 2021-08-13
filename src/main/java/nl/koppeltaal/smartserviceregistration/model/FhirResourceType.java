@@ -16,5 +16,6 @@ public enum FhirResourceType {
   RELATED_PERSON,
   ENDPOINT,
   ORGANIZATION,
+  DEVICE,
   SUBSCRIPTION;
 }

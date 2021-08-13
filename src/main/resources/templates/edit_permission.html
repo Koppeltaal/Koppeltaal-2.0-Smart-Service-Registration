@@ -37,6 +37,7 @@
           <option th:selected="${#strings.equals(permission.resourceType, 'RELATED_PERSON')}" value="RELATED_PERSON">RelatedPerson</option>
           <option th:selected="${#strings.equals(permission.resourceType, 'ENDPOINT')}" value="ENDPOINT">Endpoint</option>
           <option th:selected="${#strings.equals(permission.resourceType, 'ORGANIZATION')}" value="ORGANIZATION">Organization</option>
+          <option th:selected="${#strings.equals(permission.resourceType, 'DEVICE')}" value="DEVICE">Device</option>
           <option th:selected="${#strings.equals(permission.resourceType, 'SUBSCRIPTION')}" value="SUBSCRIPTION">Subscription</option>
         </select>
         <label>Resource</label>
