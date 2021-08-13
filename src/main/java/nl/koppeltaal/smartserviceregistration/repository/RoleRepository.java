@@ -15,4 +15,6 @@ import org.springframework.data.repository.CrudRepository;
 public interface RoleRepository extends CrudRepository<Role, UUID> {
 
   List<Role> findAll();
+
+  List<Role> findByCreatedBy(String createdBy);
 }

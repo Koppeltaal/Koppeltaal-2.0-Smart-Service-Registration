@@ -9,13 +9,20 @@ import java.security.interfaces.RSAKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import javax.annotation.PostConstruct;
 import nl.koppeltaal.smartserviceregistration.exception.SmartServiceRegistrationException;
+import nl.koppeltaal.smartserviceregistration.model.CrudOperation;
+import nl.koppeltaal.smartserviceregistration.model.FhirResourceType;
+import nl.koppeltaal.smartserviceregistration.model.Permission;
+import nl.koppeltaal.smartserviceregistration.model.PermissionScope;
 import nl.koppeltaal.smartserviceregistration.model.Role;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import nl.koppeltaal.smartserviceregistration.model.SmartServiceStatus;
+import nl.koppeltaal.smartserviceregistration.repository.PermissionRepository;
 import nl.koppeltaal.smartserviceregistration.repository.RoleRepository;
 import nl.koppeltaal.smartserviceregistration.repository.SmartServiceRepository;
 import nl.koppeltaal.spring.boot.starter.smartservice.service.fhir.DeviceFhirClientService;
@@ -37,13 +44,16 @@ public class SmartServiceService {
 
   private final SmartServiceRepository repository;
   private final RoleRepository roleRepository;
+  private final PermissionRepository permissionRepository;
   private final DeviceFhirClientService deviceFhirClientService;
 
   public SmartServiceService(SmartServiceRepository repository,
       RoleRepository roleRepository,
+      PermissionRepository permissionRepository,
       DeviceFhirClientService deviceFhirClientService) {
     this.repository = repository;
     this.roleRepository = roleRepository;
+    this.permissionRepository = permissionRepository;
     this.deviceFhirClientService = deviceFhirClientService;
   }
 
@@ -57,7 +67,34 @@ public class SmartServiceService {
       repository.save(smartService);
 
       //IMPORTANT: Should manually call /authorization/ensure_devices after the client_id is
-      //configured  in the FHIR store
+      //configured in the FHIR store
+    }
+
+    if(roleRepository.findByCreatedBy("system").isEmpty()) {
+      Role adminRole = new Role();
+      adminRole.setCreatedBy("system");
+      adminRole.setName("Admin");
+
+      Set<Permission> permissions = new HashSet<>();
+
+      for (FhirResourceType resourceType : FhirResourceType.values()) {
+        for (CrudOperation operation : CrudOperation.values()) {
+          final Permission permission = new Permission();
+
+          permission.setOperation(operation);
+          permission.setResourceType(resourceType);
+          permission.setScope(PermissionScope.ALL);
+          permission.setRole(adminRole);
+          permission.setCreatedBy("system");
+
+          permissions.add(permission);
+        }
+      }
+
+      adminRole.setPermissions(permissions);
+      roleRepository.save(adminRole);
+
+      permissionRepository.saveAll(permissions);
     }
   }
 
