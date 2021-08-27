@@ -125,9 +125,9 @@ public class SmartServiceService {
     device.addIdentifier(clientIdIdentifier);
 
     try {
-      LOG.info("Attempting to ensure device: {}", device);
+      LOG.info("Attempting to ensure device");
       device = deviceFhirClientService.storeResource(device);
-      LOG.info("Ensured device: {}", device);
+      LOG.info("Ensured device with reference [{}]", device.getIdElement().getIdPart());
 
       smartService.setFhirStoreDeviceId(device.getIdElement().getIdPart());
       final SmartService savedSmartService = repository.save(smartService);
