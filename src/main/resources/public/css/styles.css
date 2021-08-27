@@ -95,5 +95,7 @@ nav.black-text .breadcrumb:before {
 }
 
 .actions-column {
+    min-width: 100px;
+    max-width: 100px;
     width: 100px;
 }
