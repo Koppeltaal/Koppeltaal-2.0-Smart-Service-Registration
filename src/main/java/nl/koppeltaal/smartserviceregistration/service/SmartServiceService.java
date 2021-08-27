@@ -111,6 +111,7 @@ public class SmartServiceService {
    * a Device record to the FHIR store. The Device has the client_id set as an identifier.
    */
   private SmartService ensureDeviceForASmartService(SmartService smartService) {
+    LOG.info("Attempting to ensure a device for SMART service: {}", smartService);
     final DeviceDeviceNameComponent name = new DeviceDeviceNameComponent();
     name.setName(smartService.getName());
 
@@ -124,10 +125,16 @@ public class SmartServiceService {
     device.addIdentifier(clientIdIdentifier);
 
     try {
+      LOG.info("Attempting to ensure device: {}", device);
       device = deviceFhirClientService.storeResource(device);
+      LOG.info("Ensured device: {}", device);
 
       smartService.setFhirStoreDeviceId(device.getIdElement().getIdPart());
-      return repository.save(smartService);
+      final SmartService savedSmartService = repository.save(smartService);
+
+      LOG.info("Ensured device id on SMART Service: {}", smartService);
+
+      return savedSmartService;
     } catch (IOException e) {
       LOG.warn(String.format("Failed to store device for smart service [%s]", smartService), e);
     }
