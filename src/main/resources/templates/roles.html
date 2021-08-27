@@ -11,7 +11,7 @@
       <th>Naam</th>
       <th>Aangemaakt op</th>
       <th>Aantal permissies</th>
-      <th>Edit</th>
+      <th class="actions-column">Edit</th>
     </tr>
     </thead>
     <tbody>
@@ -22,7 +22,7 @@
       <td th:text="${role.name}"/>
       <td th:text="${#temporals.format(role.createdOn, 'dd-MM-yyyy HH:mm')}"/></td>
       <td th:text="${#lists.size(role.permissions)}"/>
-      <td class="edit-authorizations">
+      <td class="edit-authorizations actions-column">
         <a class="btn amber" th:href="@{/roles/edit(id=${role.id})}"><i class="material-icons">edit</i></a>
       </td>
     </tr>

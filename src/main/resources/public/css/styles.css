@@ -93,3 +93,7 @@ form button[type="submit"] {
 nav.black-text .breadcrumb:before {
     color: black;
 }
+
+.actions-column {
+    width: 100px;
+}

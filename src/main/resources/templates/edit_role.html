@@ -28,7 +28,7 @@
       <th>Operation</th>
       <th>Scope</th>
       <th>Granted</th>
-      <th>Acties</th>
+      <th class="actions-column">Acties</th>
     </tr>
     </thead>
     <tbody>
@@ -43,7 +43,7 @@
         <span th:text="${grantedServiceStat.last} ? ${grantedService.name} : ${grantedService.name + ', '}" th:each="grantedService, grantedServiceStat : ${permission.grantedServices}">
         </span>
       </td>
-      <td>
+      <td class="actions-column">
         <div class="row">
           <a th:href="@{/permission/edit(id=${permission.id})}" class="btn amber col s6" type="submit"><i class="material-icons">edit</i></a>
           <form th:action="@{/permission/delete(permissionId=${permission.id}, roleId=${role.id})}" method="post">
