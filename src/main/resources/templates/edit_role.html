@@ -40,8 +40,7 @@
       <td th:text="${permission.operation}" />
       <td th:text="${permission.scope}" />
       <td>
-        <span th:text="${grantedServiceStat.last} ? ${grantedService.name} : ${grantedService.name + ', '}" th:each="grantedService, grantedServiceStat : ${permission.grantedServices}">
-        </span>
+        <span th:if="${#strings.equals(permission.scope, 'GRANTED')}" th:text="${grantedServiceStat.last} ? ${grantedService.name} : ${grantedService.name + ', '}" th:each="grantedService, grantedServiceStat : ${permission.grantedServices}"/>
       </td>
       <td class="actions-column">
         <div class="row">
