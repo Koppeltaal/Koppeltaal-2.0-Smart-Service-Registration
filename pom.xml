@@ -13,7 +13,7 @@
   <artifactId>smart-service-registration</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>smart-service-registration</name>
-  <description>Demo project for Spring Boot</description>
+  <description>Koppeltaal 2.0 Smart Service Registration</description>
   <properties>
     <java.version>11</java.version>
   </properties>
