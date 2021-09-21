@@ -30,6 +30,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Device.DeviceDeviceNameComponent;
+import org.hl7.fhir.r4.model.Device.DeviceNameType;
 import org.hl7.fhir.r4.model.Device.FHIRDeviceStatus;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -114,6 +115,7 @@ public class SmartServiceService {
     LOG.info("Attempting to ensure a device for SMART service: {}", smartService);
     final DeviceDeviceNameComponent name = new DeviceDeviceNameComponent();
     name.setName(smartService.getName());
+    name.setType(DeviceNameType.OTHER);
 
     Device device = new Device();
     device.setDeviceName(Collections.singletonList(name));
