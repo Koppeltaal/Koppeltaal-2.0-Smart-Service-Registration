@@ -115,7 +115,7 @@ public class SmartServiceService {
     LOG.info("Attempting to ensure a device for SMART service: {}", smartService);
     final DeviceDeviceNameComponent name = new DeviceDeviceNameComponent();
     name.setName(smartService.getName());
-    name.setType(DeviceNameType.OTHER);
+    name.setType(DeviceNameType.USERFRIENDLYNAME);
 
     Device device = new Device();
     device.setDeviceName(Collections.singletonList(name));
