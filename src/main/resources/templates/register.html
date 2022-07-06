@@ -89,7 +89,7 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
         isUnique = true;
       } catch (_) {}
 
-      const valid = isHttps && isUnique;
+      const valid = (isHttps || [[${allowHttpHosts}]]) && isUnique;
       updateSaveButton(valid);
       if(valid) {
         input.setCustomValidity("");

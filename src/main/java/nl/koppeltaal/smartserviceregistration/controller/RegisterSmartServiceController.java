@@ -7,6 +7,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.servlet.http.HttpSession;
+
+import nl.koppeltaal.smartserviceregistration.config.SmartServiceConfiguration;
 import nl.koppeltaal.smartserviceregistration.exception.SmartServiceRegistrationException;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import nl.koppeltaal.smartserviceregistration.service.SmartServiceService;
@@ -27,9 +29,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class RegisterSmartServiceController {
 
   private final SmartServiceService smartServiceService;
+  private final SmartServiceConfiguration smartServiceConfiguration;
 
-  public RegisterSmartServiceController(SmartServiceService smartServiceService) {
+  public RegisterSmartServiceController(SmartServiceService smartServiceService, SmartServiceConfiguration smartServiceConfiguration) {
     this.smartServiceService = smartServiceService;
+    this.smartServiceConfiguration = smartServiceConfiguration;
   }
 
   @GetMapping
@@ -43,6 +47,7 @@ public class RegisterSmartServiceController {
         .collect(Collectors.toSet());
 
     model.addAttribute("registeredEndpoints", registeredEndpoints);
+    model.addAttribute("allowHttpHosts", smartServiceConfiguration.isAllowHttpHosts());
     model.addAttribute("user", session.getAttribute("user"));
 
     return "register";
