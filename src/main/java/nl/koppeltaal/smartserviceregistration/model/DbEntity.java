@@ -13,8 +13,7 @@ public class DbEntity {
 
   @Id
   @GeneratedValue
-  @Column(columnDefinition = "CHAR(36)")
-  @Type(type = "uuid-char")
+  @Type(type="pg-uuid")
   private UUID id;
 
   @Column(name = "created_on")
