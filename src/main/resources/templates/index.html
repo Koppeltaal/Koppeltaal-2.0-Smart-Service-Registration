@@ -4,7 +4,7 @@
 </head>
 <body>
 <nav th:replace="fragment/header :: header(selected='index')"></nav>
-<div class="container">
+<div>
   <table id="smart-services-overview" class="striped highlight">
     <thead>
     <tr>
@@ -15,6 +15,7 @@
       <th>Aanvraagdatum</th>
       <th>Requester</th>
       <th>Endpoint</th>
+      <th>Device</th>
       <th>Public Key</th>
       <th>Delete</th>
     </tr>
@@ -55,6 +56,7 @@
       <td th:text="${#temporals.format(smartService.createdOn, 'dd-MM-yyyy HH:mm')}"/>
       <td th:text="${smartService.createdBy}"/>
       <td th:text="${smartService.jwksEndpoint}"/>
+      <td th:text="${smartService.fhirStoreDeviceId}"/>
       <td th:text="${smartService.publicKey}"/>
       <td class="delete-service" th:attr="data-service-id=${smartService.id}, data-client-id=${smartService.clientId}">
         <div class="btn amber"><i class="material-icons">delete</i></div>
