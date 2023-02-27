@@ -50,4 +50,9 @@ public class AuthorizationController {
     smartServiceService.ensureDevices();
   }
 
+@PostMapping("repair_device_identifiers")
+  public void repairDeviceIdentifiers()  {
+    smartServiceService.repairDeviceIdentifiers();
+  }
+
 }

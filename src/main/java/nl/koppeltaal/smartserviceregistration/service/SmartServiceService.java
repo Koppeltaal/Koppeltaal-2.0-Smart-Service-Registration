@@ -13,10 +13,10 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.PostConstruct;
 import nl.koppeltaal.smartserviceregistration.exception.SmartServiceRegistrationException;
 import nl.koppeltaal.smartserviceregistration.model.CrudOperation;
-import nl.koppeltaal.smartserviceregistration.model.FhirResourceType;
 import nl.koppeltaal.smartserviceregistration.model.Permission;
 import nl.koppeltaal.smartserviceregistration.model.PermissionScope;
 import nl.koppeltaal.smartserviceregistration.model.Role;
@@ -253,5 +253,49 @@ public class SmartServiceService {
 
     LOG.info("User [{}] deleted SmartService {}.", user, smartService);
     repository.delete(smartService);
+  }
+
+  /**
+   * The KT2 profiles now have a fixed NamingSystem for the client-id.
+   * This call repairs identifiers by changing the system to the correct NamingSystem
+   */
+  public void repairDeviceIdentifiers() {
+
+
+    AtomicInteger updatedCount = new AtomicInteger(0);
+    AtomicInteger allCount = new AtomicInteger(0);
+
+    Iterable<SmartService> allSmartServices = repository.findAll();
+    allSmartServices.forEach((smartService -> {
+
+      allCount.getAndIncrement();
+
+      if(StringUtils.isBlank(smartService.getClientId())) {
+        LOG.warn("Skipping SmartService with id [{}] as no client_id is defined", smartService.getId());
+        return;
+      }
+
+      Device deviceByClientId = deviceFhirClientService.getResourceByIdentifier(smartService.getClientId());
+      if(deviceByClientId == null) {
+        LOG.warn("No Device found for SmartService with client_id [{}]", smartService.getClientId());
+        return;
+      }
+
+      deviceByClientId.getIdentifier().forEach((identifier -> {
+        if("https://koppeltaal.nl/client_id".equals(identifier.getSystem())) {
+          LOG.info("Updating smart-service identifier system with client_id [{}] to [http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id]", smartService.getClientId());
+          identifier.setSystem("http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id");
+          try {
+            Device device = deviceFhirClientService.storeResource(deviceByClientId);
+            LOG.info("Updated system for Device/{}", device.getId());
+            updatedCount.getAndIncrement();
+          } catch (IOException e) {
+            throw new RuntimeException("Failed to update client_id system", e);
+          }
+        }
+      }));
+
+      LOG.info("Updated [{}] out of [{}] SmartServices", updatedCount.get(), allCount.get());
+    }));
   }
 }
