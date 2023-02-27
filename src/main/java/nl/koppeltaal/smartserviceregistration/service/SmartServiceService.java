@@ -122,7 +122,7 @@ public class SmartServiceService {
     device.setStatus(FHIRDeviceStatus.ACTIVE);
 
     final Identifier clientIdIdentifier = new Identifier();
-    clientIdIdentifier.setSystem("https://koppeltaal.nl/client_id");
+    clientIdIdentifier.setSystem("http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id");
     clientIdIdentifier.setValue(smartService.getClientId());
     device.addIdentifier(clientIdIdentifier);
 
