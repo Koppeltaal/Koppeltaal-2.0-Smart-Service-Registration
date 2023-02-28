@@ -275,27 +275,17 @@ public class SmartServiceService {
 
       //old records sometimes don't have the status set, this is required
       if(deviceByClientId.hasStatus()) {
-        LOG.info("Marking status as active for Device/{}", deviceByClientId.getId());
+        LOG.info("Marking status as active for Device/{}", deviceByClientId.getIdElement().getIdPart());
         deviceByClientId.setStatus(FHIRDeviceStatus.ACTIVE);
       }
-
-      //old records sometimes don't a device name type
-      List<DeviceDeviceNameComponent> deviceNames = deviceByClientId.getDeviceName();
-      deviceNames.forEach((deviceDeviceNameComponent -> {
-        if(!deviceDeviceNameComponent.hasType()) {
-          LOG.info("Marking nameType [NULL] for device name [{}] (Device/{})", deviceDeviceNameComponent.getName(), deviceByClientId.getId());
-          deviceDeviceNameComponent.setType(DeviceNameType.NULL);
-        }
-      }));
 
       deviceByClientId.getIdentifier().forEach((identifier -> {
         LOG.info("Updating smart-service identifier system with client_id [{}] to [http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id]", smartService.getClientId());
         identifier.setSystem("http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id");
 
-
         try {
           Device device = deviceFhirClientService.storeResource(deviceByClientId);
-          LOG.info("Updated system for Device/{}", device.getId());
+          LOG.info("Updated system for Device/{}", device.getIdElement().getIdPart());
           updatedCount.getAndIncrement();
         } catch (IOException e) {
           throw new RuntimeException("Failed to update client_id system", e);
