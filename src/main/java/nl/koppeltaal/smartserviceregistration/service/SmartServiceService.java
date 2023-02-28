@@ -257,7 +257,6 @@ public class SmartServiceService {
    */
   public void repairDeviceIdentifiers() {
 
-
     AtomicInteger updatedCount = new AtomicInteger(0);
 
     Iterable<SmartService> allSmartServices = repository.findAll();
@@ -276,6 +275,7 @@ public class SmartServiceService {
 
       //old records sometimes don't have the status set, this is required
       if(deviceByClientId.hasStatus()) {
+        LOG.info("Marking status as active for Device/{}", deviceByClientId.getId());
         deviceByClientId.setStatus(FHIRDeviceStatus.ACTIVE);
       }
 
@@ -283,6 +283,7 @@ public class SmartServiceService {
       List<DeviceDeviceNameComponent> deviceNames = deviceByClientId.getDeviceName();
       deviceNames.forEach((deviceDeviceNameComponent -> {
         if(!deviceDeviceNameComponent.hasType()) {
+          LOG.info("Marking nameType [NULL] for device name [{}] (Device/{})", deviceDeviceNameComponent.getName(), deviceByClientId.getId());
           deviceDeviceNameComponent.setType(DeviceNameType.NULL);
         }
       }));
