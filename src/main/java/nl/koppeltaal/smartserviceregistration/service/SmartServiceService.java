@@ -278,9 +278,16 @@ public class SmartServiceService {
         return;
       }
 
+      //old records sometimes don't have the status set, this is required
+      if(deviceByClientId.getStatus() == null) {
+        deviceByClientId.setStatus(FHIRDeviceStatus.ACTIVE);
+      }
+
       deviceByClientId.getIdentifier().forEach((identifier -> {
         LOG.info("Updating smart-service identifier system with client_id [{}] to [http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id]", smartService.getClientId());
         identifier.setSystem("http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id");
+
+
         try {
           Device device = deviceFhirClientService.storeResource(deviceByClientId);
           LOG.info("Updated system for Device/{}", device.getId());
