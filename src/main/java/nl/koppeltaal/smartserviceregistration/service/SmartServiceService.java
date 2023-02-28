@@ -288,7 +288,7 @@ public class SmartServiceService {
           LOG.info("Updated system for Device/{}", device.getIdElement().getIdPart());
           updatedCount.getAndIncrement();
         } catch (IOException e) {
-          throw new RuntimeException("Failed to update client_id system", e);
+          LOG.error("Failed to update Device/{}", deviceByClientId.getIdElement().getIdPart());
         }
       }));
 
