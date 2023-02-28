@@ -263,39 +263,34 @@ public class SmartServiceService {
 
 
     AtomicInteger updatedCount = new AtomicInteger(0);
-    AtomicInteger allCount = new AtomicInteger(0);
 
     Iterable<SmartService> allSmartServices = repository.findAll();
     allSmartServices.forEach((smartService -> {
-
-      allCount.getAndIncrement();
 
       if(StringUtils.isBlank(smartService.getClientId())) {
         LOG.warn("Skipping SmartService with id [{}] as no client_id is defined", smartService.getId());
         return;
       }
 
-      Device deviceByClientId = deviceFhirClientService.getResourceByIdentifier(smartService.getClientId());
+      Device deviceByClientId = deviceFhirClientService.getResourceByIdentifier(smartService.getClientId(), "https://koppeltaal.nl/client_id", null);
       if(deviceByClientId == null) {
         LOG.warn("No Device found for SmartService with client_id [{}]", smartService.getClientId());
         return;
       }
 
       deviceByClientId.getIdentifier().forEach((identifier -> {
-        if("https://koppeltaal.nl/client_id".equals(identifier.getSystem())) {
-          LOG.info("Updating smart-service identifier system with client_id [{}] to [http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id]", smartService.getClientId());
-          identifier.setSystem("http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id");
-          try {
-            Device device = deviceFhirClientService.storeResource(deviceByClientId);
-            LOG.info("Updated system for Device/{}", device.getId());
-            updatedCount.getAndIncrement();
-          } catch (IOException e) {
-            throw new RuntimeException("Failed to update client_id system", e);
-          }
+        LOG.info("Updating smart-service identifier system with client_id [{}] to [http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id]", smartService.getClientId());
+        identifier.setSystem("http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id");
+        try {
+          Device device = deviceFhirClientService.storeResource(deviceByClientId);
+          LOG.info("Updated system for Device/{}", device.getId());
+          updatedCount.getAndIncrement();
+        } catch (IOException e) {
+          throw new RuntimeException("Failed to update client_id system", e);
         }
       }));
 
-      LOG.info("Updated [{}] out of [{}] SmartServices", updatedCount.get(), allCount.get());
+      LOG.info("Updated [{}] SmartServices", updatedCount.get());
     }));
   }
 }
