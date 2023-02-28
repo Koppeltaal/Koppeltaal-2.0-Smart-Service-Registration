@@ -8,11 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.PostConstruct;
 import nl.koppeltaal.smartserviceregistration.exception.SmartServiceRegistrationException;
@@ -279,9 +275,17 @@ public class SmartServiceService {
       }
 
       //old records sometimes don't have the status set, this is required
-      if(deviceByClientId.getStatus() == null) {
+      if(deviceByClientId.hasStatus()) {
         deviceByClientId.setStatus(FHIRDeviceStatus.ACTIVE);
       }
+
+      //old records sometimes don't a device name type
+      List<DeviceDeviceNameComponent> deviceNames = deviceByClientId.getDeviceName();
+      deviceNames.forEach((deviceDeviceNameComponent -> {
+        if(!deviceDeviceNameComponent.hasType()) {
+          deviceDeviceNameComponent.setType(DeviceNameType.NULL);
+        }
+      }));
 
       deviceByClientId.getIdentifier().forEach((identifier -> {
         LOG.info("Updating smart-service identifier system with client_id [{}] to [http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id]", smartService.getClientId());
