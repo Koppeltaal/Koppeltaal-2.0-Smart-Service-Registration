@@ -269,7 +269,7 @@ public class SmartServiceService {
 
       Device deviceByClientId = deviceFhirClientService.getResourceByIdentifier(smartService.getClientId(), "https://koppeltaal.nl/client_id", null);
       if(deviceByClientId == null) {
-        LOG.warn("No Device found for SmartService with client_id [{}]", smartService.getClientId());
+        LOG.info("No Device found for SmartService with client_id [{}] and system [https://koppeltaal.nl/client_id]", smartService.getClientId());
         return;
       }
 
