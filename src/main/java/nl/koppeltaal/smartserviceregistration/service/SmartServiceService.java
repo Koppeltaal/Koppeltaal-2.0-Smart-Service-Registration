@@ -287,7 +287,7 @@ public class SmartServiceService {
           Device device = deviceFhirClientService.storeResource(deviceByClientId);
           LOG.info("Updated system for Device/{}", device.getIdElement().getIdPart());
           updatedCount.getAndIncrement();
-        } catch (IOException e) {
+        } catch (Exception e) {
           LOG.error("Failed to update Device/{}", deviceByClientId.getIdElement().getIdPart());
         }
       }));
