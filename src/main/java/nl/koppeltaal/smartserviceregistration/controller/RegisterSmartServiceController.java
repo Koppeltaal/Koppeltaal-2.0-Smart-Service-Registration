@@ -31,9 +31,18 @@ public class RegisterSmartServiceController {
   private final SmartServiceService smartServiceService;
   private final SmartServiceConfiguration smartServiceConfiguration;
 
-  public RegisterSmartServiceController(SmartServiceService smartServiceService, SmartServiceConfiguration smartServiceConfiguration) {
+  private final String defaultPractitionerIdp;
+  private final String defaultPatientIdp;
+
+  public RegisterSmartServiceController(
+          SmartServiceService smartServiceService,
+          SmartServiceConfiguration smartServiceConfiguration,
+          @Value("${launch.idp.default.endpoint.practitioner}") String defaultPractitionerIdp,
+          @Value("${launch.idp.default.endpoint.patient}") String defaultPatientIdp) {
     this.smartServiceService = smartServiceService;
     this.smartServiceConfiguration = smartServiceConfiguration;
+    this.defaultPractitionerIdp = defaultPractitionerIdp;
+    this.defaultPatientIdp = defaultPatientIdp;
   }
 
   @GetMapping
@@ -46,6 +55,9 @@ public class RegisterSmartServiceController {
         .map(URL::toString)
         .collect(Collectors.toSet());
 
+    model.addAttribute("defaultPatientIdp", defaultPatientIdp);
+    model.addAttribute("defaultPractitionerIdp", defaultPractitionerIdp);
+    model.addAttribute("registeredEndpoints", registeredEndpoints);
     model.addAttribute("registeredEndpoints", registeredEndpoints);
     model.addAttribute("allowHttpHosts", smartServiceConfiguration.isAllowHttpHosts());
     model.addAttribute("user", session.getAttribute("user"));
