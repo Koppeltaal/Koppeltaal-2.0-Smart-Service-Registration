@@ -54,7 +54,7 @@ public class OidcClientService {
 		rv.putParameter("response_type", "code");
 		rv.putParameter("client_id", oidcConfiguration.getClientId());
 		rv.putParameter("redirect_uri", redirectUrl);
-		rv.putParameter("scope", "openid user/Patient.* user/Practitioner.*");
+		rv.putParameter("scope", "openid");
 		String state = UUID.randomUUID().toString();
 		rv.putParameter("state", state);
 		rv.putParameter("aud", serverUrl);
@@ -69,7 +69,7 @@ public class OidcClientService {
 		try (CloseableHttpClient httpClient = createHttpClient()) {
 
 			List<NameValuePair> params = new ArrayList<>();
-			params.add(new BasicNameValuePair("grant_type", "id_token"));
+			params.add(new BasicNameValuePair("grant_type", "authorization_code"));
 			params.add(new BasicNameValuePair("redirect_uri", redirectUri));
 			params.add(new BasicNameValuePair("code", code));
 
