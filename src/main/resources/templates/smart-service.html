@@ -34,24 +34,40 @@
               </div>
               <div class="row">
                 <div class="col s12">
-                  <div class="input-field col s6">
+                  <div class="input-field col s8">
                     <i class="material-icons prefix">http</i>
                     <input id="patient-idp-endpoint" placeholder="Patient IDP Endpoint" name="patientIdpEndpoint" type="url" class="validate" th:value="${client.patientIdpEndpoint != null ? client.patientIdpEndpoint : defaultPatientIdp}">
                     <label for="patient-idp-endpoint">Patient IDP Endpoint</label>
+                  </div>
+                  <div class="input-field col s4">
+                    <select name="patientIdpUsernameAttribute">
+                      <option value="preferred_username" th:selected="${client.patientIdpUsernameAttribute == 'preferred_username'}">preferred_username</option>
+                      <option value="sub" th:selected="${client.patientIdpUsernameAttribute == 'sub'}">sub</option>
+                      <option value="email" th:selected="${client.patientIdpUsernameAttribute == 'email'}">email</option>
+                    </select>
+                    <label>Patient IDP username attribuut</label>
                   </div>
                 </div>
               </div>
               <div class="row">
                 <div class="col s12">
-                  <div class="input-field col s6">
+                  <div class="input-field col s8">
                     <i class="material-icons prefix">http</i>
                     <input id="practitioner-idp-endpoint" placeholder="Practitioner IDP Endpoint" name="practitionerIdpEndpoint" type="url" class="validate" th:value="${client.practitionerIdpEndpoint != null ? client.practitionerIdpEndpoint : defaultPractitionerIdp}">
                     <label for="practitioner-idp-endpoint">Practitioner IDP Endpoint</label>
                   </div>
+                  <div class="input-field col s4">
+                    <select name="practitionerIdpUsernameAttribute">
+                      <option value="preferred_username" th:selected="${client.practitionerIdpUsernameAttribute == 'preferred_username'}">preferred_username</option>
+                      <option value="sub" th:selected="${client.practitionerIdpUsernameAttribute == 'sub'}">sub</option>
+                      <option value="email" th:selected="${client.practitionerIdpUsernameAttribute == 'email'}">email</option>
+                    </select>
+                    <label>Practitioner IDP username attribuut</label>
+                  </div>
                 </div>
               </div>
               <div id="jwks_url" class="col s12">
-                <div class="input-field col s6">
+                <div class="input-field col s12">
                   <i class="material-icons prefix">http</i>
                   <input placeholder="JWKS endpoint" id="jwks_endpoint" name="jwksEndpoint" type="url" class="validate" th:value="${error == null ? client.jwksEndpoint : error.endpoint}">
                   <label for="jwks_endpoint">JWKS Endpoint</label>
@@ -90,7 +106,9 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
 <script th:inline="javascript">
   (function()  {
     M.Tabs.init(document.getElementById('card-tabs'));
+    M.FormSelect.init(document.querySelectorAll('select'));
     M.textareaAutoResize(document.getElementById('public_key_textarea'));
+
     let registeredEndpoints = /*[[${registeredEndpoints}]]*/ [];
     registeredEndpoints = registeredEndpoints
         .filter((endpoint) => endpoint != [[${client.jwksEndpoint}]]) //exclude own endpoint for updating existing

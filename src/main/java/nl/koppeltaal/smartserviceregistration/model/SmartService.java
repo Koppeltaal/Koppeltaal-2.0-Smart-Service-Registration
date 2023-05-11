@@ -53,8 +53,14 @@ public class SmartService extends DbEntity {
   @Column(name = "patient_idp_endpoint")
   private String patientIdpEndpoint;
 
+  @Column(name = "patient_idp_username_attribute")
+  private String patientIdpUsernameAttribute;
+
   @Column(name = "practitioner_idp_endpoint")
   private String practitionerIdpEndpoint;
+
+  @Column(name = "practitioner_idp_username_attribute")
+  private String practitionerIdpUsernameAttribute;
 
   public Role getRole() {
     return role;
@@ -128,6 +134,22 @@ public class SmartService extends DbEntity {
     this.practitionerIdpEndpoint = practitionerIdpEndpoint;
   }
 
+  public String getPatientIdpUsernameAttribute() {
+    return patientIdpUsernameAttribute;
+  }
+
+  public void setPatientIdpUsernameAttribute(String patientIdpUsernameAttribute) {
+    this.patientIdpUsernameAttribute = patientIdpUsernameAttribute;
+  }
+
+  public String getPractitionerIdpUsernameAttribute() {
+    return practitionerIdpUsernameAttribute;
+  }
+
+  public void setPractitionerIdpUsernameAttribute(String practitionerIdpUsernameAttribute) {
+    this.practitionerIdpUsernameAttribute = practitionerIdpUsernameAttribute;
+  }
+
   @Override
   public String toString() {
     return "SmartService{" +
@@ -140,6 +162,8 @@ public class SmartService extends DbEntity {
             ", fhirStoreDeviceId='" + fhirStoreDeviceId + '\'' +
             ", patientIdpEndpoint='" + patientIdpEndpoint + '\'' +
             ", practitionerIdpEndpoint='" + practitionerIdpEndpoint + '\'' +
+            ", patientIdpUsernameAttribute='" + patientIdpUsernameAttribute + '\'' +
+            ", practitionerIdpUsernameAttribute='" + practitionerIdpUsernameAttribute + '\'' +
             "} " + super.toString();
   }
 }

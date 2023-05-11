@@ -1,8 +1,6 @@
 package nl.koppeltaal.smartserviceregistration.service;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAKey;
@@ -144,34 +142,8 @@ public class SmartServiceService {
     return repository.findById(id);
   }
 
-  public SmartService registerNewService(String jwksEndpoint, String name, String publicKey, String currentUser) {
-
-    final SmartService smartService = new SmartService();
-
-    if(StringUtils.isNotBlank(jwksEndpoint)) {
-      try {
-        smartService.setJwksEndpoint(new URL(jwksEndpoint));
-      } catch (MalformedURLException e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    if(StringUtils.isNotBlank(publicKey) && isValidPublicKey(publicKey)) {
-      smartService.setPublicKey(publicKey);
-    }
-
-    smartService.setName(name);
-    smartService.setCreatedBy(currentUser);
-
-    try {
-      return ensureDeviceForASmartService(smartService);  //also saves the smartService
-    } catch (DataIntegrityViolationException e) {
-      throw new SmartServiceRegistrationException(jwksEndpoint, jwksEndpoint + " is reeds geregistreerd.", e);
-    }
-  }
-
-  private boolean isValidPublicKey(String publicKey) {
-    String cleanPublicKey = publicKey.replace("-----BEGIN PUBLIC KEY-----\r\n", "");
+  private boolean validatePublicKey(SmartService smartService) {
+    String cleanPublicKey = smartService.getPublicKey().replace("-----BEGIN PUBLIC KEY-----\r\n", "");
     cleanPublicKey = cleanPublicKey.replace("\r\n-----END PUBLIC KEY-----", "");
     byte[] encoded = Base64.decodeBase64(cleanPublicKey);
 
@@ -183,12 +155,12 @@ public class SmartServiceService {
       final int bitLength = pubKey.getModulus().bitLength();
 
       if(bitLength < 2048)
-        throw new SmartServiceRegistrationException("",
+        throw new SmartServiceRegistrationException(smartService,
             String.format("Key needs to be at least 2048 bits but got [%d] instead", bitLength), null);
 
       return true;
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-      throw new SmartServiceRegistrationException("", "Incorrect public key", e);
+      throw new SmartServiceRegistrationException(smartService, "Incorrect public key", e);
     }
   }
 
@@ -251,6 +223,8 @@ public class SmartServiceService {
       existingSmartService.setPublicKey(smartService.getPublicKey());
       existingSmartService.setPatientIdpEndpoint(smartService.getPatientIdpEndpoint());
       existingSmartService.setPractitionerIdpEndpoint(smartService.getPractitionerIdpEndpoint());
+      existingSmartService.setPatientIdpUsernameAttribute(smartService.getPatientIdpUsernameAttribute());
+      existingSmartService.setPractitionerIdpUsernameAttribute(smartService.getPractitionerIdpUsernameAttribute());
       return repository.save(existingSmartService);
     }
 
@@ -283,18 +257,22 @@ public class SmartServiceService {
   public void repairDeviceIdentifiers() {
 
     AtomicInteger updatedCount = new AtomicInteger(0);
+    AtomicInteger failedCount = new AtomicInteger(0);
+    AtomicInteger skippedCount = new AtomicInteger(0);
 
     Iterable<SmartService> allSmartServices = repository.findAll();
     allSmartServices.forEach((smartService -> {
 
       if(StringUtils.isBlank(smartService.getClientId())) {
         LOG.warn("Skipping SmartService with id [{}] as no client_id is defined", smartService.getId());
+        skippedCount.getAndIncrement();
         return;
       }
 
       Device deviceByClientId = deviceFhirClientService.getResourceByIdentifier(smartService.getClientId(), "https://koppeltaal.nl/client_id", null);
       if(deviceByClientId == null) {
         LOG.info("No Device found for SmartService with client_id [{}] and system [https://koppeltaal.nl/client_id]", smartService.getClientId());
+        skippedCount.getAndIncrement();
         return;
       }
 
@@ -314,10 +292,11 @@ public class SmartServiceService {
           updatedCount.getAndIncrement();
         } catch (Exception e) {
           LOG.error("Failed to update Device/{}", deviceByClientId.getIdElement().getIdPart());
+          failedCount.getAndIncrement();
         }
       }));
-
-      LOG.info("Updated [{}] SmartServices", updatedCount.get());
     }));
+
+    LOG.info("Updated [{}] SmartServices", updatedCount.get());
   }
 }
