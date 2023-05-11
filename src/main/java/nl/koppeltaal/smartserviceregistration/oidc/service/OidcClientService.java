@@ -11,13 +11,6 @@ package nl.koppeltaal.smartserviceregistration.oidc.service;
 import com.auth0.jwk.JwkException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
 import nl.koppeltaal.smartserviceregistration.dto.AuthorizationUrlDto;
 import nl.koppeltaal.smartserviceregistration.jwt.JwtValidationService;
 import nl.koppeltaal.smartserviceregistration.oidc.IdTokenResponse;
@@ -32,13 +25,25 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.UUID;
 
 /**
  *
  */
 @Service
 public class OidcClientService {
+
+	private final static Logger LOG = LoggerFactory.getLogger(OidcClientService.class);
 
 	final JwtValidationService jwtValidationService;
 	final OidcConfiguration oidcConfiguration;
@@ -80,6 +85,7 @@ public class OidcClientService {
 			CloseableHttpResponse response = httpClient.execute(httpPost);
 			try (InputStream in = response.getEntity().getContent()) {
 				String res = IOUtils.toString(in, StandardCharsets.UTF_8);
+				LOG.debug("Got response: {}", res);
 				ObjectMapper objectMapper = new ObjectMapper();
 				tokenStorage.updateToken(objectMapper.readValue(res, IdTokenResponse.class));
 			}

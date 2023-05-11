@@ -1,5 +1,7 @@
 package nl.koppeltaal.smartserviceregistration.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.net.URL;
 import java.util.UUID;
 import javax.persistence.Column;
@@ -11,6 +13,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 /**
  * This entity resembles a <a href="https://hl7.org/fhir/uv/bulkdata/authorization/index.html">SMART Backend Service</a>.
@@ -38,6 +42,7 @@ public class SmartService extends DbEntity {
   private URL jwksEndpoint;
 
   @Column(name = "public_key", length = 512)
+  @JsonInclude(NON_EMPTY)
   private String publicKey;
 
   private String name;

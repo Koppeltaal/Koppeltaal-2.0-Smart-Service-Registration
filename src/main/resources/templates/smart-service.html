@@ -7,7 +7,7 @@
   <div class="row new-registry">
     <div class="col s12">
       <div class="card">
-        <form method="post">
+        <form action="/smart-service" th:method="post" th:object="${client}">
           <div class="card-content amber-text">
             <div class="row">
               <div class="col s12">
@@ -18,7 +18,8 @@
               </div>
             </div>
             <div class="row">
-              <span class="card-title">Nieuwe aanvraag SMART Backend Service</span>
+              <span class="card-title" th:if="${client == null}">Nieuwe aanvraag SMART Backend Service</span>
+              <span class="card-title" th:if="${client != null}">SMART Backend Service bewerken</span>
               <div class="row col s12" th:if="${error != null}" >
                 <h6 class="red-text" th:text="${error.message}"></h6>
               </div>
@@ -27,15 +28,32 @@
               <div class="col s12">
                 <div class="input-field col s6">
                   <i class="material-icons prefix">title</i>
-                  <input id="service-name" placeholder="Servicenaam" name="name" type="text" class="validate">
+                  <input id="service-name" placeholder="Servicenaam" name="name" type="text" class="validate" th:value="${client.name}">
                   <label for="service-name">Servicenaam</label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col s12">
+                  <div class="input-field col s6">
+                    <i class="material-icons prefix">http</i>
+                    <input id="patient-idp-endpoint" placeholder="Patient IDP Endpoint" name="patientIdpEndpoint" type="url" class="validate" th:value="${client.patientIdpEndpoint != null ? client.patientIdpEndpoint : defaultPatientIdp}">
+                    <label for="patient-idp-endpoint">Patient IDP Endpoint</label>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col s12">
+                  <div class="input-field col s6">
+                    <i class="material-icons prefix">http</i>
+                    <input id="practitioner-idp-endpoint" placeholder="Practitioner IDP Endpoint" name="practitionerIdpEndpoint" type="url" class="validate" th:value="${client.practitionerIdpEndpoint != null ? client.practitionerIdpEndpoint : defaultPractitionerIdp}">
+                    <label for="practitioner-idp-endpoint">Practitioner IDP Endpoint</label>
+                  </div>
                 </div>
               </div>
               <div id="jwks_url" class="col s12">
                 <div class="input-field col s6">
-                  <i class="material-icons prefix">contact_mail</i>
-                  <input th:if="${error == null}" placeholder="JWKS endpoint" id="jwks_endpoint" name="jwksEndpoint" type="url" class="validate">
-                  <input th:if="${error != null}" placeholder="JWKS endpoint" id="jwks_endpoint" name="jwksEndpoint" type="url" class="validate" th:value="${error.endpoint}">
+                  <i class="material-icons prefix">http</i>
+                  <input placeholder="JWKS endpoint" id="jwks_endpoint" name="jwksEndpoint" type="url" class="validate" th:value="${error == null ? client.jwksEndpoint : error.endpoint}">
                   <label for="jwks_endpoint">JWKS Endpoint</label>
                   <span class="helper-text"></span>
                 </div>
@@ -47,7 +65,7 @@
                               style="min-height: 100px;" placeholder="-----BEGIN PUBLIC KEY-----
 MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMeqb5874k8CwSAHmy88vv4pyxUN5C4p
 T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
------END PUBLIC KEY-----"></textarea>
+-----END PUBLIC KEY-----" th:value="${client.publicKey}"></textarea>
                     <label for="public_key_textarea">RSA512 Key (at least 2048 bits)</label>
                   </div>
                 </div>
@@ -59,6 +77,7 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
               <i class="material-icons right">send</i>
             </button>
           </div>
+          <input type="hidden" th:field="*{id}" />
         </form>
       </div>
     </div>
@@ -72,6 +91,10 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
   (function()  {
     M.Tabs.init(document.getElementById('card-tabs'));
     M.textareaAutoResize(document.getElementById('public_key_textarea'));
+    let registeredEndpoints = /*[[${registeredEndpoints}]]*/ [];
+    registeredEndpoints = registeredEndpoints
+        .filter((endpoint) => endpoint != [[${client.jwksEndpoint}]]) //exclude own endpoint for updating existing
+        .map((endpoint) => endpoint.replaceAll("\\", ""))
 
     const validateJwksUrl = function(event) {
       const input = event.target;
@@ -85,8 +108,7 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
         const url = new URL(value);
         isHttps = url.protocol === "https:";
 
-        isUnique = ![[${registeredEndpoints}]].includes(value);
-        isUnique = true;
+        isUnique = !registeredEndpoints.includes(value);
       } catch (_) {}
 
       const valid = (isHttps || [[${allowHttpHosts}]]) && isUnique;
@@ -121,6 +143,8 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
 
     const textarea = document.getElementById('public_key_textarea');
     textarea.addEventListener('keyup', validatePublicKey, true);
+
+    updateSaveButton([[${client.id != null}]])
   })();
 </script>
 

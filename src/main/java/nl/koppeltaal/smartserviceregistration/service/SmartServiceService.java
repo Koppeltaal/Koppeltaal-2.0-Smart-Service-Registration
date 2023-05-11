@@ -236,6 +236,31 @@ public class SmartServiceService {
     return repository.save(smartService);
   }
 
+  public SmartService upsert(SmartService smartService) {
+
+    if(StringUtils.isBlank(smartService.getPublicKey())) {
+      smartService.setPublicKey(null);
+    } else {
+      validatePublicKey(smartService);
+    }
+
+    if(smartService.getId() != null) {
+      SmartService existingSmartService = repository.findById(smartService.getId()).orElseThrow();
+      existingSmartService.setJwksEndpoint(smartService.getJwksEndpoint());
+      existingSmartService.setName(smartService.getName());
+      existingSmartService.setPublicKey(smartService.getPublicKey());
+      existingSmartService.setPatientIdpEndpoint(smartService.getPatientIdpEndpoint());
+      existingSmartService.setPractitionerIdpEndpoint(smartService.getPractitionerIdpEndpoint());
+      return repository.save(existingSmartService);
+    }
+
+    try {
+      return ensureDeviceForASmartService(smartService);  //also saves the smartService
+    } catch (DataIntegrityViolationException e) {
+      throw new SmartServiceRegistrationException(smartService, smartService.getJwksEndpoint() + " is reeds geregistreerd.", e);
+    }
+  }
+
   public void delete(UUID id, String user) {
 
     final Optional<SmartService> optionalSmartService = repository.findById(id);

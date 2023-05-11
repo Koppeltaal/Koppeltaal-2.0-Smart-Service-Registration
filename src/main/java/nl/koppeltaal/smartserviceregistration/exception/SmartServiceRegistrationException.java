@@ -1,5 +1,6 @@
 package nl.koppeltaal.smartserviceregistration.exception;
 
+import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import org.springframework.dao.DataIntegrityViolationException;
 
 /**
@@ -8,14 +9,18 @@ import org.springframework.dao.DataIntegrityViolationException;
  */
 public class SmartServiceRegistrationException extends RuntimeException {
 
-  private final String endpoint;
+  private final SmartService smartService;
 
-  public SmartServiceRegistrationException(String endpoint, String message, Throwable e) {
+  public SmartServiceRegistrationException(SmartService smartService, String message, Throwable e) {
     super(message, e);
-    this.endpoint = endpoint;
+    this.smartService = smartService;
+  }
+
+  public SmartService getSmartService() {
+    return smartService;
   }
 
   public String getEndpoint() {
-    return endpoint;
+    return smartService.getJwksEndpoint() != null ? smartService.getJwksEndpoint().toString() : null;
   }
 }

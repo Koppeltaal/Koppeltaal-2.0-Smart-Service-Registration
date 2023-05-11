@@ -3,9 +3,9 @@ html, head, body, .container {
 }
 
 .delete-service {
-    width: 40px;
+    width: 50px;
     cursor: pointer;
-    padding: 7px;
+    padding: 0;
 }
 
 .nav-extended {
