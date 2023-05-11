@@ -28,6 +28,13 @@ import org.springframework.util.Assert;
  */
 @Component
 public class JwtValidationService {
+
+	private final JwkProviderFactory jwkProviderFactory;
+
+	public JwtValidationService(JwkProviderFactory jwkProviderFactory) {
+		this.jwkProviderFactory = jwkProviderFactory;
+	}
+
 	/**
 	 * Unfortunately, this implementation of JWT has no helper method for selecting the right
 	 * algorithm from the header. The public key must match the algorithm type (RSA or EC), but
@@ -70,7 +77,7 @@ public class JwtValidationService {
 		// Lookup the issuer.
 		String issuer = decode.getIssuer();
 
-		JwkProvider provider = JwkProviderFactory.getJwkProvider(issuer);
+		JwkProvider provider = jwkProviderFactory.getJwkProvider(issuer);
 		Jwk jwk = provider.get(decode.getKeyId());
 		Assert.isTrue(jwk != null, String.format("Unable to locate public key for issuer %s", issuer));
 
