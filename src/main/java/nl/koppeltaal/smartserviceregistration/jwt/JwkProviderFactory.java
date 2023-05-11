@@ -37,7 +37,7 @@ public class JwkProviderFactory {
 	final private Map<String, JwkProvider> CACHE = new HashMap<>();
 
 	@Value("#{${jwk.provider.factory.issuer.override}}")
-	private Map<String,String> issuerOverrides;
+	private Map<String,String> issuerOverrides = new HashMap<>();
 
 	private final static Logger LOG = LoggerFactory.getLogger(JwkProviderFactory.class);
 
