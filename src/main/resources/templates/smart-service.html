@@ -71,15 +71,14 @@
                 </div>
               </div>
               <div id="public_key" class="col s12">
-                <div class="row">
-                  <div class="input-field col s12">
-                    <textarea id="public_key_textarea" class="materialize-textarea" name="publicKey"
-                              style="min-height: 100px;" placeholder="-----BEGIN PUBLIC KEY-----
+                <div class="input-field col s12">
+                  <textarea id="public_key_textarea" th:value="${client.publicKey}" th:text="${client.publicKey}"
+                            class="materialize-textarea" name="publicKey"
+                            style="min-height: 100px;" placeholder="-----BEGIN PUBLIC KEY-----
 MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMeqb5874k8CwSAHmy88vv4pyxUN5C4p
 T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
------END PUBLIC KEY-----" th:value="${client.publicKey}"></textarea>
-                    <label for="public_key_textarea">RSA512 Key (at least 2048 bits)</label>
-                  </div>
+-----END PUBLIC KEY-----"></textarea>
+                  <label for="public_key_textarea">RSA512 Key (at least 2048 bits)</label>
                 </div>
               </div>
             </div>
