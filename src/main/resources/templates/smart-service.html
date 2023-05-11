@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragment/head :: head"></head>
 <body>
-<nav th:replace="fragment/header :: header(selected='register')"></nav>
+<nav th:replace="fragment/header :: header(selected='smart-service')"></nav>
 <div>
   <div class="row new-registry">
     <div class="col s12">
@@ -18,51 +18,47 @@
               </div>
             </div>
             <div class="row">
-              <span class="card-title" th:if="${client == null}">Nieuwe aanvraag SMART Backend Service</span>
-              <span class="card-title" th:if="${client != null}">SMART Backend Service bewerken</span>
+              <span class="card-title" th:if="${client.id == null}">Nieuwe aanvraag SMART Backend Service</span>
+              <span class="card-title" th:if="${client.id != null}">SMART Backend Service bewerken</span>
               <div class="row col s12" th:if="${error != null}" >
                 <h6 class="red-text" th:text="${error.message}"></h6>
               </div>
             </div>
             <div class="row">
-              <div class="col s12">
-                <div class="input-field col s6">
-                  <i class="material-icons prefix">title</i>
-                  <input id="service-name" placeholder="Servicenaam" name="name" type="text" class="validate" th:value="${client.name}">
-                  <label for="service-name">Servicenaam</label>
-                </div>
-              </div>
               <div class="row">
                 <div class="col s12">
-                  <div class="input-field col s8">
-                    <i class="material-icons prefix">http</i>
-                    <input id="patient-idp-endpoint" placeholder="Patient IDP Endpoint" name="patientIdpEndpoint" type="url" class="validate" th:value="${client.patientIdpEndpoint != null ? client.patientIdpEndpoint : defaultPatientIdp}">
-                    <label for="patient-idp-endpoint">Patient IDP Endpoint</label>
-                  </div>
-                  <div class="input-field col s4">
-                    <select name="patientIdpUsernameAttribute">
-                      <option value="preferred_username" th:selected="${client.patientIdpUsernameAttribute == 'preferred_username'}">preferred_username</option>
-                      <option value="sub" th:selected="${client.patientIdpUsernameAttribute == 'sub'}">sub</option>
-                      <option value="email" th:selected="${client.patientIdpUsernameAttribute == 'email'}">email</option>
-                    </select>
-                    <label>Patient IDP username attribuut</label>
+                  <div class="input-field col s6">
+                    <i class="material-icons prefix">title</i>
+                    <input id="service-name" placeholder="Servicenaam" name="name" type="text" class="validate" th:value="${client.name}">
+                    <label for="service-name">Servicenaam</label>
                   </div>
                 </div>
               </div>
               <div class="row">
                 <div class="col s12">
-                  <div class="input-field col s8">
-                    <i class="material-icons prefix">http</i>
-                    <input id="practitioner-idp-endpoint" placeholder="Practitioner IDP Endpoint" name="practitionerIdpEndpoint" type="url" class="validate" th:value="${client.practitionerIdpEndpoint != null ? client.practitionerIdpEndpoint : defaultPractitionerIdp}">
-                    <label for="practitioner-idp-endpoint">Practitioner IDP Endpoint</label>
-                  </div>
-                  <div class="input-field col s4">
-                    <select name="practitionerIdpUsernameAttribute">
-                      <option value="preferred_username" th:selected="${client.practitionerIdpUsernameAttribute == 'preferred_username'}">preferred_username</option>
-                      <option value="sub" th:selected="${client.practitionerIdpUsernameAttribute == 'sub'}">sub</option>
-                      <option value="email" th:selected="${client.practitionerIdpUsernameAttribute == 'email'}">email</option>
+                  <div class="input-field col s6">
+                    <i class="material-icons prefix">security</i>
+                    <select th:field="*{patientIdp}">
+                      <optgroup label="Koppeltaal">
+                        <option th:value="${null}" th:text="Default"></option>
+                      </optgroup>
+                      <optgroup label="Custom IDP">
+                        <option th:each="idp : ${idps}" th:attr="data-idp-id=${idp.id}" th:value="${idp.id}" th:text="${idp.name}"></option>
+                      </optgroup>
                     </select>
-                    <label>Practitioner IDP username attribuut</label>
+                    <label>Patient IDP</label>
+                  </div>
+                  <div class="input-field col s6">
+                    <i class="material-icons prefix">security</i>
+                    <select th:field="*{practitionerIdp}">
+                      <optgroup label="Koppeltaal">
+                        <option th:value="${null}" th:text="Default"></option>
+                      </optgroup>
+                      <optgroup label="Custom IDP">
+                        <option th:each="idp : ${idps}" th:attr="data-idp-id=${idp.id}" th:value="${idp.id}" th:text="${idp.name}"></option>
+                      </optgroup>
+                    </select>
+                    <label>Practitioner IDP</label>
                   </div>
                 </div>
               </div>

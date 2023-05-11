@@ -14,7 +14,8 @@
     <ul class="tabs tabs-transparent">
       <li class="tab"><a href="/" th:class="${selected == 'index' ? 'active' : ''}">Overzicht</a></li>
       <li class="tab"><a href="/roles" th:class="${selected == 'roles' ? 'active' : ''}">Rollen</a>
-      <li class="tab"><a href="/smart-service" th:class="${selected == 'register' ? 'active' : ''}">Aanvraag Indienen</a>
+      <li class="tab"><a href="/smart-service" th:class="${selected == 'smart-service' ? 'active' : ''}">Aanvraag Indienen</a>
+      <li class="tab"><a href="/idp" th:class="${selected == 'idp' ? 'active' : ''}">IDPs</a>
       </li>
     </ul>
   </div>

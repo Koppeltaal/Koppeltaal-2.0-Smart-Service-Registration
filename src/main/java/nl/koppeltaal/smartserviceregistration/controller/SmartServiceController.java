@@ -13,10 +13,8 @@ import nl.koppeltaal.smartserviceregistration.config.SmartServiceConfiguration;
 import nl.koppeltaal.smartserviceregistration.exception.SmartServiceRegistrationException;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import nl.koppeltaal.smartserviceregistration.model.SmartServiceStatus;
-import nl.koppeltaal.smartserviceregistration.repository.SmartServiceRepository;
+import nl.koppeltaal.smartserviceregistration.repository.IdentityProviderRepository;
 import nl.koppeltaal.smartserviceregistration.service.SmartServiceService;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,19 +27,13 @@ public class SmartServiceController {
   private final SmartServiceService smartServiceService;
   private final SmartServiceConfiguration smartServiceConfiguration;
 
-  private final String defaultPractitionerIdp;
-  private final String defaultPatientIdp;
+  private final IdentityProviderRepository identityProviderRepository;
 
-  public SmartServiceController(
-          SmartServiceService smartServiceService,
-          SmartServiceConfiguration smartServiceConfiguration,
-          @Value("${launch.idp.default.endpoint.practitioner}") String defaultPractitionerIdp,
-          @Value("${launch.idp.default.endpoint.patient}") String defaultPatientIdp) {
+  public SmartServiceController(SmartServiceService smartServiceService, SmartServiceConfiguration smartServiceConfiguration, IdentityProviderRepository identityProviderRepository) {
 
     this.smartServiceService = smartServiceService;
     this.smartServiceConfiguration = smartServiceConfiguration;
-    this.defaultPractitionerIdp = defaultPractitionerIdp;
-    this.defaultPatientIdp = defaultPatientIdp;
+    this.identityProviderRepository = identityProviderRepository;
   }
 
   @GetMapping
@@ -59,8 +51,7 @@ public class SmartServiceController {
             .map(URL::toString)
             .collect(Collectors.toSet());
 
-    model.addAttribute("defaultPatientIdp", defaultPatientIdp);
-    model.addAttribute("defaultPractitionerIdp", defaultPractitionerIdp);
+    model.addAttribute("idps", identityProviderRepository.findByOrderByCreatedOnDesc());
     model.addAttribute("registeredEndpoints", registeredEndpoints);
     model.addAttribute("registeredEndpoints", registeredEndpoints);
     model.addAttribute("allowHttpHosts", smartServiceConfiguration.isAllowHttpHosts());

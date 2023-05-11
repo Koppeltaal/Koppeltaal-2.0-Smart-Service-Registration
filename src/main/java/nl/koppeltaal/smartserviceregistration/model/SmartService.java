@@ -4,15 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.net.URL;
 import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
@@ -50,17 +42,13 @@ public class SmartService extends DbEntity {
   @Column(name = "fhir_store_device_id")
   private String fhirStoreDeviceId;
 
-  @Column(name = "patient_idp_endpoint")
-  private String patientIdpEndpoint;
+  @OneToOne
+  @JoinColumn(name = "patient_idp", foreignKey = @ForeignKey(name = "patient_idp_fk"))
+  private IdentityProvider patientIdp;
 
-  @Column(name = "patient_idp_username_attribute")
-  private String patientIdpUsernameAttribute;
-
-  @Column(name = "practitioner_idp_endpoint")
-  private String practitionerIdpEndpoint;
-
-  @Column(name = "practitioner_idp_username_attribute")
-  private String practitionerIdpUsernameAttribute;
+  @OneToOne
+  @JoinColumn(name = "practitioner_idp", foreignKey = @ForeignKey(name = "practitioner_idp_fk"))
+  private IdentityProvider practitionerIdp;
 
   public Role getRole() {
     return role;
@@ -118,36 +106,20 @@ public class SmartService extends DbEntity {
     this.fhirStoreDeviceId = fhirStoreDeviceId;
   }
 
-  public String getPatientIdpEndpoint() {
-    return patientIdpEndpoint;
+  public IdentityProvider getPatientIdp() {
+    return patientIdp;
   }
 
-  public void setPatientIdpEndpoint(String patientIdpEndpoint) {
-    this.patientIdpEndpoint = patientIdpEndpoint;
+  public void setPatientIdp(IdentityProvider patientIdp) {
+    this.patientIdp = patientIdp;
   }
 
-  public String getPractitionerIdpEndpoint() {
-    return practitionerIdpEndpoint;
+  public IdentityProvider getPractitionerIdp() {
+    return practitionerIdp;
   }
 
-  public void setPractitionerIdpEndpoint(String practitionerIdpEndpoint) {
-    this.practitionerIdpEndpoint = practitionerIdpEndpoint;
-  }
-
-  public String getPatientIdpUsernameAttribute() {
-    return patientIdpUsernameAttribute;
-  }
-
-  public void setPatientIdpUsernameAttribute(String patientIdpUsernameAttribute) {
-    this.patientIdpUsernameAttribute = patientIdpUsernameAttribute;
-  }
-
-  public String getPractitionerIdpUsernameAttribute() {
-    return practitionerIdpUsernameAttribute;
-  }
-
-  public void setPractitionerIdpUsernameAttribute(String practitionerIdpUsernameAttribute) {
-    this.practitionerIdpUsernameAttribute = practitionerIdpUsernameAttribute;
+  public void setPractitionerIdp(IdentityProvider practitionerIdpEndpoint) {
+    this.practitionerIdp = practitionerIdpEndpoint;
   }
 
   @Override
@@ -160,10 +132,8 @@ public class SmartService extends DbEntity {
             ", publicKey='" + publicKey + '\'' +
             ", name='" + name + '\'' +
             ", fhirStoreDeviceId='" + fhirStoreDeviceId + '\'' +
-            ", patientIdpEndpoint='" + patientIdpEndpoint + '\'' +
-            ", practitionerIdpEndpoint='" + practitionerIdpEndpoint + '\'' +
-            ", patientIdpUsernameAttribute='" + patientIdpUsernameAttribute + '\'' +
-            ", practitionerIdpUsernameAttribute='" + practitionerIdpUsernameAttribute + '\'' +
+            ", patientIdp=" + patientIdp +
+            ", practitionerIdp=" + practitionerIdp +
             "} " + super.toString();
   }
 }

@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/head :: head">
+</head>
+<body>
+<nav th:replace="fragment/header :: header(selected='idp')"></nav>
+<div>
+  <table id="smart-services-overview" class="striped highlight">
+    <thead>
+    <tr>
+      <th>Naam</th>
+      <th>Endpoint</th>
+      <th>client_id</th>
+      <th>Username Attribuut</th>
+      <th>Acties</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="idp, idpStat : ${idps}" th:attr="data-idp-id=${idp.id}">
+      <td th:text="${idp.name}"/>
+      <td th:text="${idp.endpoint}"/>
+      <td th:text="${idp.clientId}"/>
+      <td th:text="${idp.usernameAttribute}"/>
+      <td>
+        <a th:href="@{/idp/details/{id}(id=${idp.id})}">
+          <div class="btn amber"><i class="material-icons">edit</i></div>
+        </a>
+        <a class="btn amber delete-service" th:attr="data-idp-id=${idp.id}, data-idp-name=${idp.name}">
+          <i class="material-icons">delete</i>
+        </a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <div class="fixed-action-btn">
+    <a class="btn-floating btn-large waves-effect waves-light modal-trigger red fixed-action-btn" href="/idp/details"><i class="material-icons">add</i></a>
+  </div>
+</div>
+</body>
+
+<!--JavaScript at end of body for optimized loading-->
+<script type="text/javascript" src="/js/materialize.min.js"></script>
+<script>
+  (function() {
+    // Initialize materialize select
+    M.FormSelect.init(document.querySelectorAll('select'), {});
+
+    M.Tooltip.init(document.querySelectorAll('.tooltipped'), {});
+
+    document.querySelectorAll('.delete-service').forEach(deleteInput => {
+      const id = deleteInput.getAttribute('data-idp-id')
+      const name = deleteInput.getAttribute('data-idp-name')
+
+      deleteInput.addEventListener('click', () => {
+        if(confirm(`Weet je zeker dat je de IDP [${name}] wilt verwijderen?`)) {
+          fetch(`/idp/${id}`, {
+            credentials: 'include',
+            method: 'DELETE',
+          })
+          .then(() => {
+            const tr = document.querySelector(`tr[data-idp-id="${id}"]`)
+
+            if(tr) tr.parentNode.removeChild(tr);
+          })
+        }
+      })
+    });
+  })();
+</script>
+</html>
