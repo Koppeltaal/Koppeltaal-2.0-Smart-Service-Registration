@@ -9,7 +9,7 @@
     <thead>
     <tr>
       <th>Naam</th>
-      <th>Endpoint</th>
+      <th>OpenID Config Endpoint</th>
       <th>client_id</th>
       <th>Username Attribuut</th>
       <th>Acties</th>
@@ -18,7 +18,7 @@
     <tbody>
     <tr th:each="idp, idpStat : ${idps}" th:attr="data-idp-id=${idp.id}">
       <td th:text="${idp.name}"/>
-      <td th:text="${idp.endpoint}"/>
+      <td th:text="${idp.openidConfigEndpoint}"/>
       <td th:text="${idp.clientId}"/>
       <td th:text="${idp.usernameAttribute}"/>
       <td>

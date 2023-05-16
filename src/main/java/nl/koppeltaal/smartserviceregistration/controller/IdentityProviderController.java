@@ -50,7 +50,7 @@ public class IdentityProviderController {
       IdentityProvider existingIdentityProvider = repository.findById(identityProvider.getId()).orElseThrow();
 
       existingIdentityProvider.setName(identityProvider.getName());
-      existingIdentityProvider.setEndpoint(identityProvider.getEndpoint());
+      existingIdentityProvider.setOpenidConfigEndpoint(identityProvider.getOpenidConfigEndpoint());
       existingIdentityProvider.setClientId(identityProvider.getClientId());
       existingIdentityProvider.setClientSecret(identityProvider.getClientSecret());
       existingIdentityProvider.setUsernameAttribute(identityProvider.getUsernameAttribute());

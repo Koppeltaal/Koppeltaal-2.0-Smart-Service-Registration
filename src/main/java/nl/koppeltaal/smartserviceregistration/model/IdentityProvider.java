@@ -9,7 +9,8 @@ import javax.persistence.Table;
 public class IdentityProvider extends DbEntity {
 
     private String name;
-    private String endpoint;
+    @Column(name = "openid_config_endpoint")
+    private String openidConfigEndpoint;
     @Column(name = "client_id")
     private String clientId;
     @Column(name = "client_secret")
@@ -25,12 +26,12 @@ public class IdentityProvider extends DbEntity {
         this.name = name;
     }
 
-    public String getEndpoint() {
-        return endpoint;
+    public String getOpenidConfigEndpoint() {
+        return openidConfigEndpoint;
     }
 
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
+    public void setOpenidConfigEndpoint(String openidConfigEndpoint) {
+        this.openidConfigEndpoint = openidConfigEndpoint;
     }
 
     public String getClientId() {
@@ -61,7 +62,7 @@ public class IdentityProvider extends DbEntity {
     public String toString() {
         return "IdentityProvider{" +
                 "name='" + name + '\'' +
-                ", endpoint='" + endpoint + '\'' +
+                ", openidConfigEndpoint='" + openidConfigEndpoint + '\'' +
                 ", clientId='" + clientId + '\'' +
                 ", clientSecret='" + clientSecret + '\'' +
                 ", usernameAttribute='" + usernameAttribute + '\'' +

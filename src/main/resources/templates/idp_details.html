@@ -25,9 +25,9 @@
                   </div>
                   <div class="input-field col s8">
                     <i class="material-icons prefix">http</i>
-                    <input id="idp-endpoint" placeholder="Endpoint" name="endpoint" type="url" class="validate"
-                           th:value="${idp.endpoint}"/>
-                    <label for="idp-endpoint">Endpoint</label>
+                    <input id="idp-endpoint" placeholder="https://my.idp.com/.well-known/openid-configuration" name="openidConfigEndpoint" type="url" class="validate"
+                           th:value="${idp.openidConfigEndpoint}"/>
+                    <label for="idp-endpoint">OpenID Configuration Endpoint</label>
                   </div>
                 </div>
               </div>
@@ -63,6 +63,7 @@
                 </button>
               </div>
               <input type="hidden" th:field="*{id}"/>
+            </div>
           </form>
         </div>
       </div>
