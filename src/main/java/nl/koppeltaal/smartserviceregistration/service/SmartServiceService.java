@@ -60,6 +60,7 @@ public class SmartServiceService {
       final SmartService smartService = new SmartService();
       smartService.setName("Smart Registration Service - Domain Admin");
       smartService.setCreatedBy("system");
+      smartService.setClientId("domain-admin-client");
       repository.save(smartService);
 
       //IMPORTANT: Should manually call /authorization/ensure_devices after the client_id is
