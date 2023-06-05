@@ -113,23 +113,23 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
       const input = event.target;
       const value = input.value;
 
-      let isHttps = false;
+      let isHttp = false;
       let isUnique = false;
 
-      // Set HTML5 validity - we must have an HTTPS endpoint
+      // Set HTML5 validity - we must have an HTTP(S) endpoint
       try {
         const url = new URL(value);
-        isHttps = url.protocol === "https:";
+        isHttp = url.protocol === "https:" || url.protocol === "http:";
 
         isUnique = !registeredEndpoints.includes(value);
       } catch (_) {}
 
-      const valid = (isHttps || [[${allowHttpHosts}]]) && isUnique;
+      const valid = (isHttp || [[${allowHttpHosts}]]) && isUnique;
       updateSaveButton(valid);
       if(valid) {
         input.setCustomValidity("");
       } else {
-        if(!isHttps) input.setCustomValidity("HTTPS endpoint vereist");
+        if(!isHttp) input.setCustomValidity("HTTP(S) endpoint vereist");
         else if(!isUnique) input.setCustomValidity("Endpoint niet meer beschikbaar");
       }
 
