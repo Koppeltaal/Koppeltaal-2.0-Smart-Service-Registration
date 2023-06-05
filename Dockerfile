@@ -17,6 +17,8 @@ FROM openjdk:11.0.14-jre-slim
 
 COPY --from=build target/smart-service-registration.jar /smart-service-registration.jar
 
+RUN apt-get update && apt-get install -y curl
+
 ENV TZ="Europe/Amsterdam"
 
 EXPOSE 8080
