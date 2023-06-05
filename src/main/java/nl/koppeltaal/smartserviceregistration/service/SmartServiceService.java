@@ -46,18 +46,22 @@ public class SmartServiceService {
   private final PermissionRepository permissionRepository;
   private final DeviceFhirClientService deviceFhirClientService;
 
+  private final String jwksUrl;
+
   public SmartServiceService(SmartServiceRepository repository,
-      RoleRepository roleRepository,
-      PermissionRepository permissionRepository,
-      DeviceFhirClientService deviceFhirClientService) {
+                             RoleRepository roleRepository,
+                             PermissionRepository permissionRepository,
+                             DeviceFhirClientService deviceFhirClientService,
+                             @Value("${smart.service.init.jwks_url:}") String jwksUrl) {
     this.repository = repository;
     this.roleRepository = roleRepository;
     this.permissionRepository = permissionRepository;
     this.deviceFhirClientService = deviceFhirClientService;
+    this.jwksUrl = jwksUrl;
   }
 
   @PostConstruct
-  public void init(@Value("${smart.service.init.jwks_url:}") String jwksUrl) {
+  public void init() {
 
     if(repository.count() == 0) {
       final SmartService smartService = new SmartService();
