@@ -1,6 +1,8 @@
 package nl.koppeltaal.smartserviceregistration.service;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAKey;
@@ -30,6 +32,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -54,13 +57,21 @@ public class SmartServiceService {
   }
 
   @PostConstruct
-  public void init() {
+  public void init(@Value("${smart.service.init.jwks_url:}") String jwksUrl) {
 
     if(repository.count() == 0) {
       final SmartService smartService = new SmartService();
       smartService.setName("Smart Registration Service - Domain Admin");
       smartService.setCreatedBy("system");
       smartService.setClientId("domain-admin-client");
+
+      if(StringUtils.isNotBlank(jwksUrl)) {
+        try {
+          smartService.setJwksEndpoint(new URL(jwksUrl));
+        } catch (MalformedURLException e) {
+          LOG.error(String.format("Failed to set jwks URL from value [%s]", jwksUrl), e); //continue
+        }
+      }
       repository.save(smartService);
 
       //IMPORTANT: Should manually call /authorization/ensure_devices after the client_id is
