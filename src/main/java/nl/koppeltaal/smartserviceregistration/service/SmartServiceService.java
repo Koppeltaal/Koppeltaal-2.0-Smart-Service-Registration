@@ -47,17 +47,20 @@ public class SmartServiceService {
   private final DeviceFhirClientService deviceFhirClientService;
 
   private final String jwksUrl;
+  private final String domainAdminInitializeClientId;
 
   public SmartServiceService(SmartServiceRepository repository,
                              RoleRepository roleRepository,
                              PermissionRepository permissionRepository,
                              DeviceFhirClientService deviceFhirClientService,
-                             @Value("${smart.service.init.jwks_url:}") String jwksUrl) {
+                             @Value("${smart.service.init.jwks_url:}") String jwksUrl,
+                             @Value("${smart.service.init.client_id:}") String domainAdminInitializeClientId) {
     this.repository = repository;
     this.roleRepository = roleRepository;
     this.permissionRepository = permissionRepository;
     this.deviceFhirClientService = deviceFhirClientService;
     this.jwksUrl = jwksUrl;
+    this.domainAdminInitializeClientId = domainAdminInitializeClientId;
   }
 
   @PostConstruct
@@ -67,7 +70,10 @@ public class SmartServiceService {
       final SmartService smartService = new SmartService();
       smartService.setName("Smart Registration Service - Domain Admin");
       smartService.setCreatedBy("system");
-      smartService.setClientId("domain-admin-client");
+
+      smartService.setClientId(
+              StringUtils.isNotBlank(domainAdminInitializeClientId) ? domainAdminInitializeClientId : UUID.randomUUID().toString()
+      );
 
       if(StringUtils.isNotBlank(jwksUrl)) {
         try {
@@ -76,6 +82,7 @@ public class SmartServiceService {
           LOG.error(String.format("Failed to set jwks URL from value [%s]", jwksUrl), e); //continue
         }
       }
+
       repository.save(smartService);
 
       //IMPORTANT: Should manually call /authorization/ensure_devices after the client_id is
