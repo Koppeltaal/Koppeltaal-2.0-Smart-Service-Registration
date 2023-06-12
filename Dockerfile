@@ -13,7 +13,7 @@ ENV SETTINGS_XML_PASSWORD=$SETTINGS_XML_PASSWORD
 
 RUN mvn clean install -s /ci_settings.xml
 
-FROM openjdk:11.0.14-jre-slim
+FROM openjdk:21-ea-26-jdk-slim-buster
 
 COPY --from=build target/smart-service-registration.jar /smart-service-registration.jar
 
