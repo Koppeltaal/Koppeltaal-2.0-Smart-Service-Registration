@@ -115,12 +115,21 @@ public class SmartServiceService {
 
       permissionRepository.saveAll(permissions);
     }
+
+    try {
+      ensureDevices(); //repair any services missing a Device on server boot
+    } catch (Exception e) {
+      LOG.error("Failed to ensure Devices on server boot, gracefully continuing", e);
+    }
   }
 
   public void ensureDevices() {
 
-    repository.findAllByFhirStoreDeviceIdIsNull()
-        .forEach(this::ensureDeviceForASmartService);
+    Set<SmartService> allByFhirStoreDeviceIdIsNull = repository.findAllByFhirStoreDeviceIdIsNull();
+
+    LOG.info("Found [{}] SMART services without a Device, attempting to ensure", allByFhirStoreDeviceIdIsNull.size());
+
+    allByFhirStoreDeviceIdIsNull.forEach(this::ensureDeviceForASmartService);
   }
 
   /**
