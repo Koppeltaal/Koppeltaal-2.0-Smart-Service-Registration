@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
       - name: Get current date
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
@@ -27,6 +31,7 @@ jobs:
             SETTINGS_XML_USERNAME=${{ secrets.SETTINGS_XML_USERNAME }}
             SETTINGS_XML_PASSWORD=${{ secrets.SETTINGS_XML_PASSWORD }}
           push: true
+          platforms: linux/amd64,linux/arm64/v8
           tags: |
             jorisheadease/kt2-domain-admin:${{ steps.date.outputs.date }}
             jorisheadease/kt2-domain-admin:latest
