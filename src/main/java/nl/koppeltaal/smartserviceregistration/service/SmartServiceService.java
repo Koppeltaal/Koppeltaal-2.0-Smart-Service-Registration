@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -121,6 +122,13 @@ public class SmartServiceService {
     } catch (Exception e) {
       LOG.error("Failed to ensure Devices on server boot, gracefully continuing", e);
     }
+  }
+
+
+  @Scheduled(fixedDelay = 1000 * 60, initialDelay = 1000 * 60)
+  public void ensureDevicesJob() {
+    LOG.info("CRON - Ensuring devices");
+    ensureDevices();
   }
 
   public void ensureDevices() {
