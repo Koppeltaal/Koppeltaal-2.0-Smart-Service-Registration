@@ -82,6 +82,36 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
                 </div>
               </div>
             </div>
+            <div class="row">
+              <ul id="allowed-uri-collection" class="collection with-header">
+                <li class="collection-header">
+                  <h4>
+                    <span>Allowed redirect_uri values</span>
+                    <div id="add-allowed-redirect-url" class="btn amber right">
+                      <span><i class="material-icons">add</i></span>
+                    </div>
+                  </h4>
+                  <p>
+                    Tijdens het uitvoeren van een SMART launch, wordt er een <code>redirect_uri</code> meegegeven. Om te
+                    voorkomen dat de redirect naar een ongeautoriseerde partij wordt gestuurd, kunnen hier URIs
+                    geconfigureerd worden die vertrouwd worden.
+                  </p>
+                </li>
+                <li id="no-redirect-uri-item" class="collection-item" th:if="${#lists.isEmpty(client.allowedRedirects)}">
+                  Geen redirect_uri toegevoegd
+                </li>
+                <li class="collection-item" th:each="allowedRedirect, redirectStat : *{allowedRedirects}">
+                  <div class="row">
+                    <input class="col s11" type="url" name="allowedRedirects" th:value="${allowedRedirect}" />
+                    <div class="col s1">
+                      <button th:onclick="this.parentNode.parentNode.parentNode.remove()" class="btn amber right">
+                        <span><i class="material-icons">delete</i></span>
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
           <div class="card-action">
             <button disabled id="submit-button" class="btn waves-effect waves-light amber darken-1" type="submit" name="action">Submit
@@ -103,6 +133,30 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
     M.Tabs.init(document.getElementById('card-tabs'));
     M.FormSelect.init(document.querySelectorAll('select'));
     M.textareaAutoResize(document.getElementById('public_key_textarea'));
+
+    const allowedRedirectCollection = document.getElementById('allowed-uri-collection');
+    const addAllowedRedirectButton = document.getElementById('add-allowed-redirect-url');
+
+    addAllowedRedirectButton.addEventListener('click', () => {
+      const defaultValue = document.getElementById('no-redirect-uri-item');
+      if(defaultValue) {
+        defaultValue.remove()
+      }
+
+      const redirectUriLi = document.createElement('li');
+      redirectUriLi.classList.add('collection-item')
+
+      redirectUriLi.innerHTML = '<div class="row">\n' +
+          '                    <input class="col s11" type="url" name="allowedRedirects" />\n' +
+          '                    <div class="col s1">\n' +
+          '                      <button onclick="this.parentNode.parentNode.parentNode.remove()" class="btn amber right">\n' +
+          '                        <span><i class="material-icons">delete</i></span>\n' +
+          '                      </button>\n' +
+          '                    </div>\n' +
+          '                  </div>'
+
+      allowedRedirectCollection.appendChild(redirectUriLi);
+    })
 
     let registeredEndpoints = /*[[${registeredEndpoints}]]*/ [];
     registeredEndpoints = registeredEndpoints

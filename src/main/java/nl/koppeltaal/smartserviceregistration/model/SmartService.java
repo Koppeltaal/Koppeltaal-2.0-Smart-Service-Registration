@@ -3,6 +3,8 @@ package nl.koppeltaal.smartserviceregistration.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import javax.persistence.*;
 
@@ -49,6 +51,11 @@ public class SmartService extends DbEntity {
   @OneToOne
   @JoinColumn(name = "practitioner_idp", foreignKey = @ForeignKey(name = "practitioner_idp_fk"))
   private IdentityProvider practitionerIdp;
+
+  @ElementCollection
+  @CollectionTable(name = "allowed_redirect", joinColumns = @JoinColumn(name = "smart_service_id"))
+  @Column(name = "allowed_redirects")
+  private Set<String> allowedRedirects = new HashSet<>();
 
   public Role getRole() {
     return role;
@@ -122,6 +129,14 @@ public class SmartService extends DbEntity {
     this.practitionerIdp = practitionerIdpEndpoint;
   }
 
+  public Set<String> getAllowedRedirects() {
+    return allowedRedirects;
+  }
+
+  public void setAllowedRedirects(Set<String> allowedRedirects) {
+    this.allowedRedirects = allowedRedirects;
+  }
+
   @Override
   public String toString() {
     return "SmartService{" +
@@ -134,6 +149,7 @@ public class SmartService extends DbEntity {
             ", fhirStoreDeviceId='" + fhirStoreDeviceId + '\'' +
             ", patientIdp=" + patientIdp +
             ", practitionerIdp=" + practitionerIdp +
+            ", allowedRedirects=" + allowedRedirects +
             "} " + super.toString();
   }
 }
