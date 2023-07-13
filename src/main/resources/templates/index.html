@@ -5,6 +5,9 @@
 <body>
 <nav th:replace="fragment/header :: header(selected='index')"></nav>
 <div>
+  <div class="fixed-action-btn">
+    <a id="add-smart-service-button" class="btn-floating btn-large waves-effect waves-light modal-trigger red fixed-action-btn" href="/smart-service"><i class="material-icons">add</i></a>
+  </div>
   <table id="smart-services-overview" class="striped highlight">
     <thead>
     <tr>
