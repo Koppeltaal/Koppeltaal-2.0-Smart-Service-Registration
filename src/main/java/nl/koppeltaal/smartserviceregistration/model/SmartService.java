@@ -54,7 +54,7 @@ public class SmartService extends DbEntity {
 
   @ElementCollection
   @CollectionTable(name = "allowed_redirect", joinColumns = @JoinColumn(name = "smart_service_id"))
-  @Column(name = "allowed_redirects")
+  @Column(name = "url")
   private Set<String> allowedRedirects = new HashSet<>();
 
   public Role getRole() {
