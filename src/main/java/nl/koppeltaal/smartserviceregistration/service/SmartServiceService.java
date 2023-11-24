@@ -172,7 +172,7 @@ public class SmartServiceService {
 
       if(!hasDeviceIdAsClientId) {
         LOG.info("Updating SMART Service as the client_id is not the Device id yet: {}", smartService);
-        smartService.setClientId(device.getId());
+        smartService.setClientId(device.getIdElement().getIdPart());
         upsert(smartService);
       }
 
