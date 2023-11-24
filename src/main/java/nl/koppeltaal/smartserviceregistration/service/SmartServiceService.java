@@ -141,9 +141,8 @@ public class SmartServiceService {
   }
 
   /**
-   * Every SMART service has its own client_id. The client_id could change over time, but the application
-   * itself should remain consistent. Therefore, whenever a SMART service is created, the service pushes
-   * a Device record to the FHIR store. The Device has the client_id set as an identifier.
+   * Every SMART service has its own client_id. The latest rule is that this equals the Device identifier in FHIR.
+   * So the client_id extension is unnecessary, but keeping it for consistency. In the future it might get removed
    */
   private SmartService ensureDeviceForASmartService(SmartService smartService) {
     LOG.info("Attempting to ensure a device for SMART service: {}", smartService);
@@ -157,7 +156,8 @@ public class SmartServiceService {
 
     final Identifier clientIdIdentifier = new Identifier();
     clientIdIdentifier.setSystem("http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id");
-    clientIdIdentifier.setValue(smartService.getClientId());
+    boolean hasDeviceIdAsClientId = StringUtils.equals(smartService.getFhirStoreDeviceId(), smartService.getClientId());
+    clientIdIdentifier.setValue(hasDeviceIdAsClientId ? smartService.getFhirStoreDeviceId() : "to_be_replaced_by_device_id"); //set a placeholder as an identifier is required, replace in an update
     device.addIdentifier(clientIdIdentifier);
 
     try {
@@ -169,6 +169,12 @@ public class SmartServiceService {
       final SmartService savedSmartService = repository.save(smartService);
 
       LOG.info("Ensured device id on SMART Service: {}", smartService);
+
+      if(!hasDeviceIdAsClientId) {
+        LOG.info("Updating SMART Service as the client_id is not the Device id yet: {}", smartService);
+        smartService.setClientId(device.getId());
+        upsert(smartService);
+      }
 
       return savedSmartService;
     } catch (IOException e) {
