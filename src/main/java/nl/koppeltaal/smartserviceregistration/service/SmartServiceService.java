@@ -270,6 +270,7 @@ public class SmartServiceService {
       existingSmartService.setPatientIdp(smartService.getPatientIdp());
       existingSmartService.setPractitionerIdp(smartService.getPractitionerIdp());
       existingSmartService.setAllowedRedirects(smartService.getAllowedRedirects());
+      existingSmartService.setClientId(smartService.getClientId());
       return repository.save(existingSmartService);
     }
 
