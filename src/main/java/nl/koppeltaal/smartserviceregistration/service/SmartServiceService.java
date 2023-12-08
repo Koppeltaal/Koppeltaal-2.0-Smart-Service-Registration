@@ -179,6 +179,7 @@ public class SmartServiceService {
         LOG.info("Updating SMART Service as the client_id is not the Device id yet: {}", smartService);
         smartService.setClientId(device.getIdElement().getIdPart());
         upsert(smartService);
+        repairClientIds();
       }
 
       return savedSmartService;
@@ -275,7 +276,6 @@ public class SmartServiceService {
       existingSmartService.setPatientIdp(smartService.getPatientIdp());
       existingSmartService.setPractitionerIdp(smartService.getPractitionerIdp());
       existingSmartService.setAllowedRedirects(smartService.getAllowedRedirects());
-      existingSmartService.setClientId(smartService.getClientId());
       return repository.save(existingSmartService);
     }
 
