@@ -11,6 +11,9 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.PostConstruct;
+
+import ca.uhn.fhir.rest.gclient.ICriterion;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import nl.koppeltaal.smartserviceregistration.exception.SmartServiceRegistrationException;
 import nl.koppeltaal.smartserviceregistration.model.CrudOperation;
 import nl.koppeltaal.smartserviceregistration.model.Permission;
@@ -41,6 +44,8 @@ import org.springframework.stereotype.Service;
 public class SmartServiceService {
 
   private final static Logger LOG = LoggerFactory.getLogger(SmartServiceService.class);
+  public static final String CLIENT_ID_SYSTEM = "http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id";
+  public static final String CLIENT_ID_PLACEHOLDER = "to_be_replaced_by_device_id";
 
   private final SmartServiceRepository repository;
   private final RoleRepository roleRepository;
@@ -155,9 +160,9 @@ public class SmartServiceService {
     device.setStatus(FHIRDeviceStatus.ACTIVE);
 
     final Identifier clientIdIdentifier = new Identifier();
-    clientIdIdentifier.setSystem("http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id");
+    clientIdIdentifier.setSystem(CLIENT_ID_SYSTEM);
     boolean hasDeviceIdAsClientId = StringUtils.equals(smartService.getFhirStoreDeviceId(), smartService.getClientId());
-    clientIdIdentifier.setValue(hasDeviceIdAsClientId ? smartService.getFhirStoreDeviceId() : "to_be_replaced_by_device_id"); //set a placeholder as an identifier is required, replace in an update
+    clientIdIdentifier.setValue(hasDeviceIdAsClientId ? smartService.getFhirStoreDeviceId() : CLIENT_ID_PLACEHOLDER); //set a placeholder as an identifier is required, replace in an update
     device.addIdentifier(clientIdIdentifier);
 
     try {
@@ -329,8 +334,8 @@ public class SmartServiceService {
       }
 
       deviceByClientId.getIdentifier().forEach((identifier -> {
-        LOG.info("Updating smart-service identifier system with client_id [{}] to [http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id]", smartService.getClientId());
-        identifier.setSystem("http://vzvz.nl/fhir/NamingSystem/koppeltaal-client-id");
+        LOG.info("Updating smart-service identifier system with client_id [{}] to [{}]", smartService.getClientId(), CLIENT_ID_SYSTEM);
+        identifier.setSystem(CLIENT_ID_SYSTEM);
 
         try {
           Device device = deviceFhirClientService.storeResource(deviceByClientId);
@@ -344,5 +349,30 @@ public class SmartServiceService {
     }));
 
     LOG.info("Updated [{}] SmartServices", updatedCount.get());
+  }
+
+  public void repairClientIds() {
+    ICriterion<TokenClientParam> devicesToRepairCriteria = Device.IDENTIFIER.exactly().systemAndIdentifier(CLIENT_ID_SYSTEM, CLIENT_ID_PLACEHOLDER);
+
+    List<Device> resources = deviceFhirClientService.getResources(devicesToRepairCriteria);
+    LOG.info("Found [{}] Devices with the client_id placeholder identifier", resources.size());
+
+    for (Device device : resources) {
+
+      for (Identifier identifier : device.getIdentifier()) {
+        if(CLIENT_ID_SYSTEM.equals(identifier.getSystem()) && CLIENT_ID_PLACEHOLDER.equals(identifier.getValue())) {
+          LOG.info("Transforming identifier for Device/{}", device.getIdElement().getIdPart());
+          identifier.setValue(device.getIdElement().getIdPart());
+        }
+      }
+
+      try {
+        deviceFhirClientService.storeResource(device);
+        LOG.info("Successfully repaired Device/{}", device.getIdElement().getIdPart());
+      } catch (Exception e) {
+        LOG.error("Failed to update Device.", e);
+      }
+
+    }
   }
 }
