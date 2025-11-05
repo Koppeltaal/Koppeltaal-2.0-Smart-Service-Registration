@@ -38,7 +38,7 @@
                 <div class="col s12">
                   <div class="input-field col s6">
                     <i class="material-icons prefix">security</i>
-                    <select th:field="*{patientIdp}">
+                    <select id="patientIdp" th:field="*{patientIdp}">
                       <optgroup label="Koppeltaal">
                         <option th:value="${null}" th:text="Default"></option>
                       </optgroup>
@@ -46,11 +46,11 @@
                         <option th:each="idp : ${idps}" th:attr="data-idp-id=${idp.id}" th:value="${idp.id}" th:text="${idp.name}"></option>
                       </optgroup>
                     </select>
-                    <label>Patient IDP</label>
+                    <label for="patientIdp">Patient IDP</label>
                   </div>
                   <div class="input-field col s6">
                     <i class="material-icons prefix">security</i>
-                    <select th:field="*{practitionerIdp}">
+                    <select id="practitionerIdp" th:field="*{practitionerIdp}">
                       <optgroup label="Koppeltaal">
                         <option th:value="${null}" th:text="Default"></option>
                       </optgroup>
@@ -58,7 +58,19 @@
                         <option th:each="idp : ${idps}" th:attr="data-idp-id=${idp.id}" th:value="${idp.id}" th:text="${idp.name}"></option>
                       </optgroup>
                     </select>
-                    <label>Practitioner IDP</label>
+                    <label for="practitionerIdp">Practitioner IDP</label>
+                  </div>
+                  <div class="input-field col s6">
+                    <i class="material-icons prefix">security</i>
+                    <select id="relatedPersonIdp" th:field="*{relatedPersonIdp}">
+                      <optgroup label="Koppeltaal">
+                        <option th:value="${null}" th:text="Default"></option>
+                      </optgroup>
+                      <optgroup label="Custom IDP">
+                        <option th:each="idp : ${idps}" th:attr="data-idp-id=${idp.id}" th:value="${idp.id}" th:text="${idp.name}"></option>
+                      </optgroup>
+                    </select>
+                    <label for="relatedPersonIdp">Related Person IDP</label>
                   </div>
                 </div>
               </div>

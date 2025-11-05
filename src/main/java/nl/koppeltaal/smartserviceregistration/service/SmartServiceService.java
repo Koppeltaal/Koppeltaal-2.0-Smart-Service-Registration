@@ -275,6 +275,7 @@ public class SmartServiceService {
       existingSmartService.setPublicKey(smartService.getPublicKey());
       existingSmartService.setPatientIdp(smartService.getPatientIdp());
       existingSmartService.setPractitionerIdp(smartService.getPractitionerIdp());
+      existingSmartService.setRelatedPersonIdp(smartService.getRelatedPersonIdp());
       existingSmartService.setAllowedRedirects(smartService.getAllowedRedirects());
       return repository.save(existingSmartService);
     }

@@ -51,7 +51,9 @@ public class SmartService extends DbEntity {
   @OneToOne
   @JoinColumn(name = "practitioner_idp", foreignKey = @ForeignKey(name = "practitioner_idp_fk"))
   private IdentityProvider practitionerIdp;
-
+  @OneToOne
+  @JoinColumn(name = "related_person_idp", foreignKey = @ForeignKey(name = "related_person_idp_fk"))
+  private IdentityProvider relatedPersonIdp;
   @ElementCollection
   @CollectionTable(name = "allowed_redirect", joinColumns = @JoinColumn(name = "smart_service_id"))
   @Column(name = "url")
@@ -129,6 +131,14 @@ public class SmartService extends DbEntity {
     this.practitionerIdp = practitionerIdpEndpoint;
   }
 
+  public IdentityProvider getRelatedPersonIdp() {
+    return relatedPersonIdp;
+  }
+
+  public void setRelatedPersonIdp(IdentityProvider relatedPersonIdp) {
+    this.relatedPersonIdp = relatedPersonIdp;
+  }
+
   public Set<String> getAllowedRedirects() {
     return allowedRedirects;
   }
@@ -149,6 +159,7 @@ public class SmartService extends DbEntity {
             ", fhirStoreDeviceId='" + fhirStoreDeviceId + '\'' +
             ", patientIdp=" + patientIdp +
             ", practitionerIdp=" + practitionerIdp +
+            ", relatedPersonIdp=" + relatedPersonIdp +
             ", allowedRedirects=" + allowedRedirects +
             "} " + super.toString();
   }
