@@ -1,4 +1,4 @@
-FROM maven:3.6.3-jdk-11 AS build
+FROM maven:3.9.6-openjdk-17 AS build
 
 ADD pom.xml /pom.xml
 ADD src /src
