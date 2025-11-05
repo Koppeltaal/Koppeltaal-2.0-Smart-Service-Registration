@@ -10,8 +10,8 @@ package nl.koppeltaal.smartserviceregistration.controller;
 
 import com.auth0.jwk.JwkException;
 import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import nl.koppeltaal.smartserviceregistration.dto.AuthorizationUrlDto;
 import nl.koppeltaal.smartserviceregistration.oidc.service.OidcClientService;
 import nl.koppeltaal.smartserviceregistration.util.UrlUtils;

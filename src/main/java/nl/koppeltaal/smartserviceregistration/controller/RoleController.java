@@ -9,7 +9,7 @@
 package nl.koppeltaal.smartserviceregistration.controller;
 
 import java.util.UUID;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import nl.koppeltaal.smartserviceregistration.dto.PermissionDto;
 import nl.koppeltaal.smartserviceregistration.model.Role;
 import nl.koppeltaal.smartserviceregistration.service.RoleService;

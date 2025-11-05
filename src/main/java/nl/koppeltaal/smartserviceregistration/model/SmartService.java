@@ -6,7 +6,7 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 

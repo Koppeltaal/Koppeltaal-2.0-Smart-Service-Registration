@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import nl.koppeltaal.smartserviceregistration.dto.PermissionDto;
 import nl.koppeltaal.smartserviceregistration.exception.PermissionException;
 import nl.koppeltaal.smartserviceregistration.model.Permission;

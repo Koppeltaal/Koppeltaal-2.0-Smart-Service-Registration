@@ -10,7 +10,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;

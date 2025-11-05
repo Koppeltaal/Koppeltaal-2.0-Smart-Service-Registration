@@ -8,7 +8,7 @@
 
 package nl.koppeltaal.smartserviceregistration.controller;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import nl.koppeltaal.smartserviceregistration.service.RoleService;
 import nl.koppeltaal.smartserviceregistration.service.SmartServiceService;
 import org.springframework.stereotype.Controller;

@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import nl.koppeltaal.smartserviceregistration.config.SmartServiceConfiguration;
 import nl.koppeltaal.smartserviceregistration.exception.SmartServiceRegistrationException;

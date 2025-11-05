@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import nl.koppeltaal.smartserviceregistration.model.CrudOperation;
-import nl.koppeltaal.smartserviceregistration.model.FhirResourceType;
 import nl.koppeltaal.smartserviceregistration.model.Permission;
 import nl.koppeltaal.smartserviceregistration.model.PermissionScope;
 import nl.koppeltaal.smartserviceregistration.model.Role;
@@ -123,12 +122,10 @@ public class PermissionDto {
 		permissionDto.setScope(permission.getScope());
 		permissionDto.setGrantedServices(permission.getGrantedServices().stream()
 				.map(SmartService::getId).collect(
-				Collectors.toSet())
-		);
+						Collectors.toSet()));
 		permissionDto.setGrantedDeviceIds(permission.getGrantedServices().stream()
 				.map(SmartService::getFhirStoreDeviceId).collect(
-						Collectors.toSet())
-		);
+						Collectors.toSet()));
 
 		return permissionDto;
 	}
