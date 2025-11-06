@@ -44,16 +44,29 @@ public class SmartService extends DbEntity {
   @Column(name = "fhir_store_device_id")
   private String fhirStoreDeviceId;
 
-  @OneToOne
-  @JoinColumn(name = "patient_idp", foreignKey = @ForeignKey(name = "patient_idp_fk"))
-  private IdentityProvider patientIdp;
+  @ManyToMany
+  @JoinTable(
+    name = "smart_service_patient_idp",
+    joinColumns = @JoinColumn(name = "smart_service_id"),
+    inverseJoinColumns = @JoinColumn(name = "identity_provider_id")
+  )
+  private Set<IdentityProvider> patientIdps = new HashSet<>();
 
-  @OneToOne
-  @JoinColumn(name = "practitioner_idp", foreignKey = @ForeignKey(name = "practitioner_idp_fk"))
-  private IdentityProvider practitionerIdp;
-  @OneToOne
-  @JoinColumn(name = "related_person_idp", foreignKey = @ForeignKey(name = "related_person_idp_fk"))
-  private IdentityProvider relatedPersonIdp;
+  @ManyToMany
+  @JoinTable(
+    name = "smart_service_practitioner_idp",
+    joinColumns = @JoinColumn(name = "smart_service_id"),
+    inverseJoinColumns = @JoinColumn(name = "identity_provider_id")
+  )
+  private Set<IdentityProvider> practitionerIdps = new HashSet<>();
+
+  @ManyToMany
+  @JoinTable(
+    name = "smart_service_related_person_idp",
+    joinColumns = @JoinColumn(name = "smart_service_id"),
+    inverseJoinColumns = @JoinColumn(name = "identity_provider_id")
+  )
+  private Set<IdentityProvider> relatedPersonIdps = new HashSet<>();
   @ElementCollection
   @CollectionTable(name = "allowed_redirect", joinColumns = @JoinColumn(name = "smart_service_id"))
   @Column(name = "url")
@@ -115,28 +128,28 @@ public class SmartService extends DbEntity {
     this.fhirStoreDeviceId = fhirStoreDeviceId;
   }
 
-  public IdentityProvider getPatientIdp() {
-    return patientIdp;
+  public Set<IdentityProvider> getPatientIdps() {
+    return patientIdps;
   }
 
-  public void setPatientIdp(IdentityProvider patientIdp) {
-    this.patientIdp = patientIdp;
+  public void setPatientIdps(Set<IdentityProvider> patientIdps) {
+    this.patientIdps = patientIdps;
   }
 
-  public IdentityProvider getPractitionerIdp() {
-    return practitionerIdp;
+  public Set<IdentityProvider> getPractitionerIdps() {
+    return practitionerIdps;
   }
 
-  public void setPractitionerIdp(IdentityProvider practitionerIdpEndpoint) {
-    this.practitionerIdp = practitionerIdpEndpoint;
+  public void setPractitionerIdps(Set<IdentityProvider> practitionerIdps) {
+    this.practitionerIdps = practitionerIdps;
   }
 
-  public IdentityProvider getRelatedPersonIdp() {
-    return relatedPersonIdp;
+  public Set<IdentityProvider> getRelatedPersonIdps() {
+    return relatedPersonIdps;
   }
 
-  public void setRelatedPersonIdp(IdentityProvider relatedPersonIdp) {
-    this.relatedPersonIdp = relatedPersonIdp;
+  public void setRelatedPersonIdps(Set<IdentityProvider> relatedPersonIdps) {
+    this.relatedPersonIdps = relatedPersonIdps;
   }
 
   public Set<String> getAllowedRedirects() {
@@ -157,9 +170,9 @@ public class SmartService extends DbEntity {
             ", publicKey='" + publicKey + '\'' +
             ", name='" + name + '\'' +
             ", fhirStoreDeviceId='" + fhirStoreDeviceId + '\'' +
-            ", patientIdp=" + patientIdp +
-            ", practitionerIdp=" + practitionerIdp +
-            ", relatedPersonIdp=" + relatedPersonIdp +
+            ", patientIdps=" + patientIdps +
+            ", practitionerIdps=" + practitionerIdps +
+            ", relatedPersonIdps=" + relatedPersonIdps +
             ", allowedRedirects=" + allowedRedirects +
             "} " + super.toString();
   }

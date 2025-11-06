@@ -38,39 +38,30 @@
                 <div class="col s12">
                   <div class="input-field col s6">
                     <i class="material-icons prefix">security</i>
-                    <select id="patientIdp" th:field="*{patientIdp}">
-                      <optgroup label="Koppeltaal">
-                        <option th:value="${null}" th:text="Default"></option>
-                      </optgroup>
+                    <select id="patientIdps" multiple th:field="*{patientIdps}">
                       <optgroup label="Custom IDP">
                         <option th:each="idp : ${idps}" th:attr="data-idp-id=${idp.id}" th:value="${idp.id}" th:text="${idp.name}"></option>
                       </optgroup>
                     </select>
-                    <label for="patientIdp">Patient IDP</label>
+                    <label for="patientIdps">Patient IDPs</label>
                   </div>
                   <div class="input-field col s6">
                     <i class="material-icons prefix">security</i>
-                    <select id="practitionerIdp" th:field="*{practitionerIdp}">
-                      <optgroup label="Koppeltaal">
-                        <option th:value="${null}" th:text="Default"></option>
-                      </optgroup>
+                    <select id="practitionerIdps" multiple th:field="*{practitionerIdps}">
                       <optgroup label="Custom IDP">
                         <option th:each="idp : ${idps}" th:attr="data-idp-id=${idp.id}" th:value="${idp.id}" th:text="${idp.name}"></option>
                       </optgroup>
                     </select>
-                    <label for="practitionerIdp">Practitioner IDP</label>
+                    <label for="practitionerIdps">Practitioner IDPs</label>
                   </div>
                   <div class="input-field col s6">
                     <i class="material-icons prefix">security</i>
-                    <select id="relatedPersonIdp" th:field="*{relatedPersonIdp}">
-                      <optgroup label="Koppeltaal">
-                        <option th:value="${null}" th:text="Default"></option>
-                      </optgroup>
+                    <select id="relatedPersonIdps" multiple th:field="*{relatedPersonIdps}">
                       <optgroup label="Custom IDP">
                         <option th:each="idp : ${idps}" th:attr="data-idp-id=${idp.id}" th:value="${idp.id}" th:text="${idp.name}"></option>
                       </optgroup>
                     </select>
-                    <label for="relatedPersonIdp">Related Person IDP</label>
+                    <label for="relatedPersonIdps">Related Person IDPs</label>
                   </div>
                 </div>
               </div>

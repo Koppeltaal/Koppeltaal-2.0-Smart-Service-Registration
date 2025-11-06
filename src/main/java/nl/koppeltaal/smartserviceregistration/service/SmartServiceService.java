@@ -273,9 +273,9 @@ public class SmartServiceService {
       existingSmartService.setJwksEndpoint(smartService.getJwksEndpoint());
       existingSmartService.setName(smartService.getName());
       existingSmartService.setPublicKey(smartService.getPublicKey());
-      existingSmartService.setPatientIdp(smartService.getPatientIdp());
-      existingSmartService.setPractitionerIdp(smartService.getPractitionerIdp());
-      existingSmartService.setRelatedPersonIdp(smartService.getRelatedPersonIdp());
+      existingSmartService.setPatientIdps(smartService.getPatientIdps());
+      existingSmartService.setPractitionerIdps(smartService.getPractitionerIdps());
+      existingSmartService.setRelatedPersonIdps(smartService.getRelatedPersonIdps());
       existingSmartService.setAllowedRedirects(smartService.getAllowedRedirects());
       return repository.save(existingSmartService);
     }

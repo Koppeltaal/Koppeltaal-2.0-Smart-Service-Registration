@@ -25,8 +25,16 @@ In order to run locally, you'll need:
 For MySQL, configure the `spring.datasource` properties in the `application.properties` and start 
 the application. 
 
-By default, the application should be available at 
-[localhost:8080](http://localhost:8080)
+By default, the application should be available at
+[localhost:8086](http://localhost:8086)
+
+### Configuration with Secrets
+
+Sensitive configuration values (database credentials, tokens, keys) can be externalized to a separate file:
+
+1. Copy `src/main/resources/application-secrets.properties.example` to `src/main/resources/application-secrets.properties`
+2. Fill in your actual secret values
+3. The secrets file is gitignored and will be automatically loaded by Spring Boot
 
 ### Downloading shared libraries
 
