@@ -1,4 +1,4 @@
-FROM maven:3.9.6-openjdk-17 AS build
+FROM maven:3.9-eclipse-temurin-17 AS build
 
 ADD pom.xml /pom.xml
 ADD src /src
@@ -13,7 +13,7 @@ ENV SETTINGS_XML_PASSWORD=$SETTINGS_XML_PASSWORD
 
 RUN mvn clean install -s /ci_settings.xml
 
-FROM openjdk:21-ea-26-jdk-slim-buster
+FROM eclipse-temurin:17-jre
 
 COPY --from=build target/smart-service-registration.jar /smart-service-registration.jar
 
