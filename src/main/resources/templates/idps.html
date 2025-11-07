@@ -22,6 +22,9 @@
       <td th:text="${idp.clientId}"/>
       <td th:text="${idp.usernameAttribute}"/>
       <td>
+        <a href="#!" class="btn amber copy-idp-id tooltipped" th:attr="data-idp-id=${idp.id}" data-position="top" data-tooltip="Copy ID">
+          <i class="material-icons">content_copy</i>
+        </a>
         <a th:href="@{/idp/details/{id}(id=${idp.id})}">
           <div class="btn amber"><i class="material-icons">edit</i></div>
         </a>
@@ -46,6 +49,22 @@
     M.FormSelect.init(document.querySelectorAll('select'), {});
 
     M.Tooltip.init(document.querySelectorAll('.tooltipped'), {});
+
+    window.copyToClipboard = function(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        M.toast({html: 'IDP ID copied to clipboard!', classes: 'green'});
+      }).catch(err => {
+        M.toast({html: 'Failed to copy: ' + err, classes: 'red'});
+      });
+    };
+
+    document.querySelectorAll('.copy-idp-id').forEach(copyButton => {
+      copyButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        const idpId = copyButton.getAttribute('data-idp-id');
+        copyToClipboard(idpId);
+      });
+    });
 
     document.querySelectorAll('.delete-service').forEach(deleteInput => {
       const id = deleteInput.getAttribute('data-idp-id')

@@ -36,7 +36,7 @@
               </div>
               <div class="row">
                 <div class="col s12">
-                  <div class="input-field col s6">
+                  <div class="input-field col s5">
                     <i class="material-icons prefix">security</i>
                     <select id="patientIdps" multiple th:field="*{patientIdps}">
                       <optgroup label="Custom IDP">
@@ -45,7 +45,13 @@
                     </select>
                     <label for="patientIdps">Patient IDPs</label>
                   </div>
-                  <div class="input-field col s6">
+                  <div class="col s1" style="padding-top: 20px;">
+                    <a href="#!" onclick="copyIdpHint('patientIdps', this); return false;" class="btn amber tooltipped dropdown-trigger" data-target="dropdown-patientIdps" data-position="top" data-tooltip="Copy idp_hint">
+                      <i class="material-icons">content_copy</i>
+                    </a>
+                    <ul id="dropdown-patientIdps" class="dropdown-content"></ul>
+                  </div>
+                  <div class="input-field col s5">
                     <i class="material-icons prefix">security</i>
                     <select id="practitionerIdps" multiple th:field="*{practitionerIdps}">
                       <optgroup label="Custom IDP">
@@ -54,7 +60,13 @@
                     </select>
                     <label for="practitionerIdps">Practitioner IDPs</label>
                   </div>
-                  <div class="input-field col s6">
+                  <div class="col s1" style="padding-top: 20px;">
+                    <a href="#!" onclick="copyIdpHint('practitionerIdps', this); return false;" class="btn amber tooltipped dropdown-trigger" data-target="dropdown-practitionerIdps" data-position="top" data-tooltip="Copy idp_hint">
+                      <i class="material-icons">content_copy</i>
+                    </a>
+                    <ul id="dropdown-practitionerIdps" class="dropdown-content"></ul>
+                  </div>
+                  <div class="input-field col s5">
                     <i class="material-icons prefix">security</i>
                     <select id="relatedPersonIdps" multiple th:field="*{relatedPersonIdps}">
                       <optgroup label="Custom IDP">
@@ -62,6 +74,12 @@
                       </optgroup>
                     </select>
                     <label for="relatedPersonIdps">Related Person IDPs</label>
+                  </div>
+                  <div class="col s1" style="padding-top: 20px;">
+                    <a href="#!" onclick="copyIdpHint('relatedPersonIdps', this); return false;" class="btn amber tooltipped dropdown-trigger" data-target="dropdown-relatedPersonIdps" data-position="top" data-tooltip="Copy idp_hint">
+                      <i class="material-icons">content_copy</i>
+                    </a>
+                    <ul id="dropdown-relatedPersonIdps" class="dropdown-content"></ul>
                   </div>
                 </div>
               </div>
@@ -136,6 +154,7 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
     M.Tabs.init(document.getElementById('card-tabs'));
     M.FormSelect.init(document.querySelectorAll('select'));
     M.textareaAutoResize(document.getElementById('public_key_textarea'));
+    M.Tooltip.init(document.querySelectorAll('.tooltipped'));
 
     const allowedRedirectCollection = document.getElementById('allowed-uri-collection');
     const addAllowedRedirectButton = document.getElementById('add-allowed-redirect-url');
@@ -215,6 +234,51 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
     textarea.addEventListener('keyup', validatePublicKey, true);
 
     updateSaveButton([[${client.id != null}]])
+
+    // Initialize dropdowns
+    const dropdownElems = document.querySelectorAll('.dropdown-trigger');
+    M.Dropdown.init(dropdownElems, {
+      constrainWidth: false,
+      coverTrigger: false
+    });
+
+    // Copy IDP hint functionality
+    window.copyIdpHint = function(selectId, button) {
+      const select = document.getElementById(selectId);
+      const selectedOptions = Array.from(select.selectedOptions);
+
+      if (selectedOptions.length === 0) {
+        M.toast({html: 'Please select at least one IDP first', classes: 'orange'});
+        return false;
+      }
+
+      if (selectedOptions.length === 1) {
+        // Only one IDP selected, copy directly
+        copyToClipboard(selectedOptions[0].value);
+        return false;
+      } else {
+        // Multiple IDPs, populate and show dropdown
+        const dropdownId = button.getAttribute('data-target');
+        const dropdown = document.getElementById(dropdownId);
+
+        dropdown.innerHTML = selectedOptions.map(opt =>
+          `<li><a href="#!" onclick="copyToClipboard('${opt.value}'); return false;">${opt.text}</a></li>`
+        ).join('');
+
+        // Reinitialize dropdown after content change
+        const instance = M.Dropdown.getInstance(button);
+        instance.open();
+        return false;
+      }
+    };
+
+    window.copyToClipboard = function(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        M.toast({html: 'IDP ID copied to clipboard!', classes: 'green'});
+      }).catch(err => {
+        M.toast({html: 'Failed to copy: ' + err, classes: 'red'});
+      });
+    };
   })();
 </script>
 
