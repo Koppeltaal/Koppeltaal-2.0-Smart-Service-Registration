@@ -53,10 +53,6 @@
               style="margin-left: 8px; position: static;">
               <i class="material-icons" style="font-size: 18px;">content_copy</i>
             </a>
-            <a href="#!" class="secondary-content remove-idp" th:attr="data-idp-id=${idp.id}"
-              style="margin-left: 12px; position: static;">
-              <i class="material-icons" style="font-size: 18px;">close</i>
-            </a>
           </li>
         </ul>
         <select th:id="${fieldName}" multiple th:field="*{__${fieldName}__}" style="display: none;">

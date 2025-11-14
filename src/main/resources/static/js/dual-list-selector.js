@@ -33,7 +33,6 @@
     // Setup drag & drop for selected list items (for reordering)
     selectedList.querySelectorAll('li').forEach(item => {
       setupDragListeners(item, selectedList, selectedList, hiddenSelect);
-      setupRemoveButton(item, availableList, selectedList, hiddenSelect);
       setupCopyButton(item);
     });
 
@@ -159,18 +158,6 @@
           dragging.appendChild(copyBtn);
           setupCopyButton(dragging);
         }
-        // Add remove button if not exists
-        if (!dragging.querySelector('.remove-idp')) {
-          const removeBtn = document.createElement('a');
-          removeBtn.href = '#!';
-          removeBtn.className = 'secondary-content remove-idp';
-          removeBtn.setAttribute('data-idp-id', idpId);
-          removeBtn.style.marginLeft = '12px';
-          removeBtn.style.position = 'static';
-          removeBtn.innerHTML = '<i class="material-icons" style="font-size: 18px;">close</i>';
-          dragging.appendChild(removeBtn);
-          setupRemoveButton(dragging, availableListEl, selectedListEl, hiddenSelect);
-        }
       }
 
       // If moving from selected to available, remove styling and buttons
@@ -187,28 +174,6 @@
       // Update default labels
       updateDefaultLabels(selectedListEl);
     });
-  }
-
-  function setupRemoveButton(item, availableList, selectedList, hiddenSelect) {
-    const removeBtn = item.querySelector('.remove-idp');
-    if (removeBtn) {
-      removeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const idpId = item.getAttribute('data-idp-id');
-
-        // Remove from selected list
-        item.remove();
-
-        // Show in available list
-        syncAvailableList(availableList, selectedList);
-
-        // Update hidden select
-        syncHiddenSelect(selectedList, hiddenSelect);
-
-        // Update default labels
-        updateDefaultLabels(selectedList);
-      });
-    }
   }
 
   function setupCopyButton(item) {
@@ -344,24 +309,6 @@
         item.appendChild(copyBtn);
         setupCopyButton(item);
       }
-
-      if (!item.querySelector('.remove-idp')) {
-        const removeBtn = document.createElement('a');
-        removeBtn.href = '#!';
-        removeBtn.className = 'secondary-content remove-idp';
-        removeBtn.setAttribute('data-idp-id', idpId);
-        removeBtn.style.marginLeft = '12px';
-        removeBtn.style.position = 'static';
-        removeBtn.innerHTML = '<i class="material-icons" style="font-size: 18px;">close</i>';
-        item.appendChild(removeBtn);
-
-        // Get the lists for the remove button handler
-        const availableListId = selectedList.id.replace('selected', 'available');
-        const availableList = document.getElementById(availableListId);
-        const hiddenSelectId = getHiddenSelectId(selectedList.id);
-        const hiddenSelect = document.getElementById(hiddenSelectId);
-        setupRemoveButton(item, availableList, selectedList, hiddenSelect);
-      }
     });
   }
 
@@ -372,9 +319,7 @@
     item.style.display = 'flex';
     item.style.alignItems = 'center';
 
-    // Remove buttons
-    const removeBtn = item.querySelector('.remove-idp');
-    if (removeBtn) removeBtn.remove();
+    // Remove copy button
     const copyBtn = item.querySelector('.copy-idp');
     if (copyBtn) copyBtn.remove();
 
