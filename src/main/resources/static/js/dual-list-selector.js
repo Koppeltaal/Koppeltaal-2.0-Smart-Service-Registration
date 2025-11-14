@@ -8,17 +8,16 @@
   // Initialize all dual-list selectors on the page
   window.initializeDualListSelectors = function(idpTypes) {
     idpTypes.forEach(idpType => {
-      initializeIdpDragDrop(idpType.available, idpType.selected, idpType.hiddenSelect);
+      initializeIdpDragDrop(idpType.available, idpType.selected);
     });
   };
 
-  function initializeIdpDragDrop(availableId, selectedId, hiddenSelectId) {
+  function initializeIdpDragDrop(availableId, selectedId) {
     const availableList = document.getElementById(availableId);
     const selectedList = document.getElementById(selectedId);
-    const hiddenSelect = document.getElementById(hiddenSelectId);
 
-    if (!availableList || !selectedList || !hiddenSelect) {
-      console.warn('Missing elements for dual-list selector:', { availableId, selectedId, hiddenSelectId });
+    if (!availableList || !selectedList) {
+      console.warn('Missing elements for dual-list selector:', { availableId, selectedId });
       return;
     }
 
@@ -27,24 +26,24 @@
 
     // Setup drag & drop for available list items
     availableList.querySelectorAll('li').forEach(item => {
-      setupDragListeners(item, availableList, selectedList, hiddenSelect);
+      setupDragListeners(item, availableList, selectedList);
     });
 
     // Setup drag & drop for selected list items (for reordering)
     selectedList.querySelectorAll('li').forEach(item => {
-      setupDragListeners(item, selectedList, selectedList, hiddenSelect);
+      setupDragListeners(item, selectedList, selectedList);
       setupCopyButton(item);
     });
 
     // Setup drop zones
-    setupDropZone(availableList, selectedList, hiddenSelect);
-    setupDropZone(selectedList, selectedList, hiddenSelect);
+    setupDropZone(availableList, selectedList);
+    setupDropZone(selectedList, selectedList);
 
     // Initialize default labels
     updateDefaultLabels(selectedList);
   }
 
-  function setupDragListeners(item, sourceList, targetList, hiddenSelect) {
+  function setupDragListeners(item, sourceList, targetList) {
     item.addEventListener('dragstart', (e) => {
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/html', item.innerHTML);
@@ -58,7 +57,7 @@
     });
   }
 
-  function setupDropZone(dropZone, selectedList, hiddenSelect) {
+  function setupDropZone(dropZone, selectedList) {
     dropZone.addEventListener('dragover', (e) => {
       const dragging = document.querySelector('.dragging');
       if (!dragging) return;
@@ -165,9 +164,6 @@
         cleanupAvailableItem(dragging);
       }
 
-      // Update hidden select based on selected list
-      syncHiddenSelect(selectedListEl, hiddenSelect);
-
       // Hide/show items in available list based on what's selected
       syncAvailableList(availableListEl, selectedListEl);
 
@@ -202,28 +198,6 @@
     }, { offset: Number.NEGATIVE_INFINITY }).element;
   }
 
-  function syncHiddenSelect(selectedList, hiddenSelect) {
-    const select = typeof hiddenSelect === 'string'
-      ? document.getElementById(hiddenSelect)
-      : hiddenSelect;
-
-    if (!select) {
-      console.error('Hidden select not found:', hiddenSelect);
-      return;
-    }
-
-    // Clear all selections
-    Array.from(select.options).forEach(opt => opt.selected = false);
-
-    // Select in order
-    const selectedItems = selectedList.querySelectorAll('li');
-    selectedItems.forEach(item => {
-      const idpId = item.getAttribute('data-idp-id');
-      const option = select.querySelector(`option[value="${idpId}"]`);
-      if (option) option.selected = true;
-    });
-  }
-
   function syncAvailableList(availableList, selectedList) {
     const selectedIds = Array.from(selectedList.querySelectorAll('li')).map(item => item.getAttribute('data-idp-id'));
 
@@ -256,13 +230,6 @@
     if (listId.includes('patient')) return 'patient';
     if (listId.includes('practitioner')) return 'practitioner';
     if (listId.includes('relatedperson')) return 'relatedperson';
-    return null;
-  }
-
-  function getHiddenSelectId(selectedListId) {
-    if (selectedListId.includes('patient')) return 'patientIdps';
-    if (selectedListId.includes('practitioner')) return 'practitionerIdps';
-    if (selectedListId.includes('relatedperson')) return 'relatedPersonIdps';
     return null;
   }
 

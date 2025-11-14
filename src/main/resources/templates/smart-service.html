@@ -121,7 +121,7 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
 <script th:inline="javascript">
   (function () {
     M.Tabs.init(document.getElementById('card-tabs'));
-    M.FormSelect.init(document.querySelectorAll('select:not(#patientIdps):not(#practitionerIdps):not(#relatedPersonIdps)'));
+    M.FormSelect.init(document.querySelectorAll('select'));
     M.textareaAutoResize(document.getElementById('public_key_textarea'));
     M.Tooltip.init(document.querySelectorAll('.tooltipped'));
 
@@ -212,14 +212,49 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
   // Initialize dual-list selectors for IDPs
   (function() {
     const idpTypes = [
-      { available: 'available-patient-idps', selected: 'selected-patient-idps', hiddenSelect: 'patientIdps' },
-      { available: 'available-practitioner-idps', selected: 'selected-practitioner-idps', hiddenSelect: 'practitionerIdps' },
-      { available: 'available-relatedperson-idps', selected: 'selected-relatedperson-idps', hiddenSelect: 'relatedPersonIdps' }
+      { available: 'available-patient-idps', selected: 'selected-patient-idps' },
+      { available: 'available-practitioner-idps', selected: 'selected-practitioner-idps' },
+      { available: 'available-relatedperson-idps', selected: 'selected-relatedperson-idps' }
     ];
 
     if (typeof initializeDualListSelectors === 'function') {
       initializeDualListSelectors(idpTypes);
     }
+
+    // Before form submit, create indexed hidden inputs to preserve order
+    const form = document.querySelector('form[action="/smart-service"]');
+    form.addEventListener('submit', function(e) {
+      // Remove existing IDP hidden inputs if any
+      form.querySelectorAll('input[name^="patientIdps["], input[name^="practitionerIdps["], input[name^="relatedPersonIdps["]').forEach(input => input.remove());
+
+      // Add ordered hidden inputs for each IDP type
+      const selectedPatientIdps = document.querySelectorAll('#selected-patient-idps li');
+      selectedPatientIdps.forEach((item, index) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = `patientIdps[${index}].id`;
+        input.value = item.getAttribute('data-idp-id');
+        form.appendChild(input);
+      });
+
+      const selectedPractitionerIdps = document.querySelectorAll('#selected-practitioner-idps li');
+      selectedPractitionerIdps.forEach((item, index) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = `practitionerIdps[${index}].id`;
+        input.value = item.getAttribute('data-idp-id');
+        form.appendChild(input);
+      });
+
+      const selectedRelatedPersonIdps = document.querySelectorAll('#selected-relatedperson-idps li');
+      selectedRelatedPersonIdps.forEach((item, index) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = `relatedPersonIdps[${index}].id`;
+        input.value = item.getAttribute('data-idp-id');
+        form.appendChild(input);
+      });
+    });
   })();
 </script>
 

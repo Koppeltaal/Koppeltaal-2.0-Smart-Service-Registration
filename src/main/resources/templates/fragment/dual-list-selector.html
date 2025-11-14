@@ -55,9 +55,6 @@
             </a>
           </li>
         </ul>
-        <select th:id="${fieldName}" multiple th:field="*{__${fieldName}__}" style="display: none;">
-          <option th:each="idp : ${availableItems}" th:value="${idp.id}" th:text="${idp.name}"></option>
-        </select>
       </div>
     </div>
   </div>
