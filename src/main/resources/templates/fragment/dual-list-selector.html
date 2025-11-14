@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+</head>
+
+<body>
+  <!-- Dual-list IDP selector fragment
+       Parameters:
+       - title: Display title (e.g., "Patient IDPs")
+       - actorType: Actor type identifier (e.g., "patient", "practitioner", "relatedperson")
+       - availableItems: List of all available items
+       - selectedItems: List of currently selected items
+       - fieldName: Form field name for binding (e.g., "patientIdps")
+  -->
+  <div th:fragment="idp-selector(title, actorType, availableItems, selectedItems, fieldName)" class="col s12"
+    style="margin-bottom: 15px;">
+    <h6 style="margin-bottom: 8px;" th:text="${title}">Title</h6>
+    <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px;">
+      <!-- Available IDPs column -->
+      <div>
+        <p style="font-size: 0.85em; margin: 0 0 5px 0;">Available IDPs</p>
+        <ul th:id="${'available-' + actorType + '-idps'}" class="collection"
+          style="min-height: 80px; border: 1px dashed #ccc; margin: 0;">
+          <li class="collection-item" th:each="idp : ${availableItems}"
+            th:attr="data-idp-id=${idp.id},data-idp-name=${idp.name}" draggable="true"
+            style="cursor: move; padding: 8px 10px; display: flex; align-items: center;">
+            <i class="material-icons tiny" style="margin-right: 8px; font-size: 16px;">drag_indicator</i>
+            <span th:text="${idp.name}"></span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Arrow column -->
+      <div>
+        <p style="font-size: 0.85em; margin: 0 0 5px 0; visibility: hidden;">-</p>
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 80px;">
+          <i class="material-icons" style="color: #26a69a;">arrow_forward</i>
+        </div>
+      </div>
+
+      <!-- Selected IDPs column -->
+      <div>
+        <p style="font-size: 0.85em; margin: 0 0 5px 0;">Selected IDPs</p>
+        <ul th:id="${'selected-' + actorType + '-idps'}" class="collection"
+          style="min-height: 80px; border: 1px solid #26a69a; margin: 0;">
+          <li class="collection-item" th:each="idp : ${selectedItems}"
+            th:attr="data-idp-id=${idp.id},data-idp-name=${idp.name}" draggable="true"
+            style="cursor: move; background-color: #e0f2f1; padding: 8px 10px; display: flex; align-items: center;">
+            <i class="material-icons tiny" style="margin-right: 8px; font-size: 16px;">drag_indicator</i>
+            <span class="idp-name" th:text="${idp.name}" style="flex: 1;"></span>
+            <a href="#!" class="secondary-content copy-idp" th:attr="data-idp-id=${idp.id}"
+              style="margin-left: 8px; position: static;">
+              <i class="material-icons" style="font-size: 18px;">content_copy</i>
+            </a>
+            <a href="#!" class="secondary-content remove-idp" th:attr="data-idp-id=${idp.id}"
+              style="margin-left: 12px; position: static;">
+              <i class="material-icons" style="font-size: 18px;">close</i>
+            </a>
+          </li>
+        </ul>
+        <select th:id="${fieldName}" multiple th:field="*{__${fieldName}__}" style="display: none;">
+          <option th:each="idp : ${availableItems}" th:value="${idp.id}" th:text="${idp.name}"></option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script include fragment - include this once in the page that uses dual-list selectors -->
+  <th:block th:fragment="scripts">
+    <script th:src="@{/js/dual-list-selector.js}"></script>
+  </th:block>
+</body>
+
+</html>

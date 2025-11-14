@@ -3,7 +3,9 @@ package nl.koppeltaal.smartserviceregistration.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import jakarta.persistence.*;
@@ -50,7 +52,8 @@ public class SmartService extends DbEntity {
     joinColumns = @JoinColumn(name = "smart_service_id"),
     inverseJoinColumns = @JoinColumn(name = "identity_provider_id")
   )
-  private Set<IdentityProvider> patientIdps = new HashSet<>();
+  @OrderColumn(name = "idp_order")
+  private List<IdentityProvider> patientIdps = new ArrayList<>();
 
   @ManyToMany
   @JoinTable(
@@ -58,7 +61,8 @@ public class SmartService extends DbEntity {
     joinColumns = @JoinColumn(name = "smart_service_id"),
     inverseJoinColumns = @JoinColumn(name = "identity_provider_id")
   )
-  private Set<IdentityProvider> practitionerIdps = new HashSet<>();
+  @OrderColumn(name = "idp_order")
+  private List<IdentityProvider> practitionerIdps = new ArrayList<>();
 
   @ManyToMany
   @JoinTable(
@@ -66,7 +70,8 @@ public class SmartService extends DbEntity {
     joinColumns = @JoinColumn(name = "smart_service_id"),
     inverseJoinColumns = @JoinColumn(name = "identity_provider_id")
   )
-  private Set<IdentityProvider> relatedPersonIdps = new HashSet<>();
+  @OrderColumn(name = "idp_order")
+  private List<IdentityProvider> relatedPersonIdps = new ArrayList<>();
   @ElementCollection
   @CollectionTable(name = "allowed_redirect", joinColumns = @JoinColumn(name = "smart_service_id"))
   @Column(name = "url")
@@ -128,27 +133,27 @@ public class SmartService extends DbEntity {
     this.fhirStoreDeviceId = fhirStoreDeviceId;
   }
 
-  public Set<IdentityProvider> getPatientIdps() {
+  public List<IdentityProvider> getPatientIdps() {
     return patientIdps;
   }
 
-  public void setPatientIdps(Set<IdentityProvider> patientIdps) {
+  public void setPatientIdps(List<IdentityProvider> patientIdps) {
     this.patientIdps = patientIdps;
   }
 
-  public Set<IdentityProvider> getPractitionerIdps() {
+  public List<IdentityProvider> getPractitionerIdps() {
     return practitionerIdps;
   }
 
-  public void setPractitionerIdps(Set<IdentityProvider> practitionerIdps) {
+  public void setPractitionerIdps(List<IdentityProvider> practitionerIdps) {
     this.practitionerIdps = practitionerIdps;
   }
 
-  public Set<IdentityProvider> getRelatedPersonIdps() {
+  public List<IdentityProvider> getRelatedPersonIdps() {
     return relatedPersonIdps;
   }
 
-  public void setRelatedPersonIdps(Set<IdentityProvider> relatedPersonIdps) {
+  public void setRelatedPersonIdps(List<IdentityProvider> relatedPersonIdps) {
     this.relatedPersonIdps = relatedPersonIdps;
   }
 

@@ -1,158 +1,127 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="fragment/head :: head"></head>
+
 <body>
-<nav th:replace="fragment/header :: header(selected='smart-service')"></nav>
-<div>
-  <div class="row new-registry">
-    <div class="col s12">
-      <div class="card">
-        <form action="/smart-service" th:method="post" th:object="${client}">
-          <div class="card-content amber-text">
-            <div class="row">
-              <div class="col s12">
-                <ul id="card-tabs" class="tabs tabs-fixed-width">
-                  <li class="tab col s3"><a class="active" href="#jwks_url">JWKS URL</a></li>
-                  <li class="tab col s3"><a href="#public_key">Public Key</a></li>
-                </ul>
-              </div>
-            </div>
-            <div class="row">
-              <span class="card-title" th:if="${client.id == null}">Nieuwe aanvraag SMART Backend Service</span>
-              <span class="card-title" th:if="${client.id != null}">SMART Backend Service bewerken</span>
-              <div class="row col s12" th:if="${error != null}" >
-                <h6 class="red-text" th:text="${error.message}"></h6>
-              </div>
-            </div>
-            <div class="row">
+  <nav th:replace="fragment/header :: header(selected='smart-service')"></nav>
+  <div>
+    <div class="row new-registry">
+      <div class="col s12">
+        <div class="card">
+          <form action="/smart-service" th:method="post" th:object="${client}">
+            <div class="card-content amber-text">
               <div class="row">
                 <div class="col s12">
-                  <div class="input-field col s6">
-                    <i class="material-icons prefix">title</i>
-                    <input id="service-name" placeholder="Servicenaam" name="name" type="text" class="validate" th:value="${client.name}">
-                    <label for="service-name">Servicenaam</label>
-                  </div>
+                  <ul id="card-tabs" class="tabs tabs-fixed-width">
+                    <li class="tab col s3"><a class="active" href="#jwks_url">JWKS URL</a></li>
+                    <li class="tab col s3"><a href="#public_key">Public Key</a></li>
+                  </ul>
                 </div>
               </div>
               <div class="row">
-                <div class="col s12">
-                  <div class="input-field col s5">
-                    <i class="material-icons prefix">security</i>
-                    <select id="patientIdps" multiple th:field="*{patientIdps}">
-                      <optgroup label="Custom IDP">
-                        <option th:each="idp : ${idps}" th:attr="data-idp-id=${idp.id}" th:value="${idp.id}" th:text="${idp.name}"></option>
-                      </optgroup>
-                    </select>
-                    <label for="patientIdps">Patient IDPs</label>
-                  </div>
-                  <div class="col s1" style="padding-top: 20px;">
-                    <a href="#!" onclick="copyIdpHint('patientIdps', this); return false;" class="btn amber tooltipped dropdown-trigger" data-target="dropdown-patientIdps" data-position="top" data-tooltip="Copy idp_hint">
-                      <i class="material-icons">content_copy</i>
-                    </a>
-                    <ul id="dropdown-patientIdps" class="dropdown-content"></ul>
-                  </div>
-                  <div class="input-field col s5">
-                    <i class="material-icons prefix">security</i>
-                    <select id="practitionerIdps" multiple th:field="*{practitionerIdps}">
-                      <optgroup label="Custom IDP">
-                        <option th:each="idp : ${idps}" th:attr="data-idp-id=${idp.id}" th:value="${idp.id}" th:text="${idp.name}"></option>
-                      </optgroup>
-                    </select>
-                    <label for="practitionerIdps">Practitioner IDPs</label>
-                  </div>
-                  <div class="col s1" style="padding-top: 20px;">
-                    <a href="#!" onclick="copyIdpHint('practitionerIdps', this); return false;" class="btn amber tooltipped dropdown-trigger" data-target="dropdown-practitionerIdps" data-position="top" data-tooltip="Copy idp_hint">
-                      <i class="material-icons">content_copy</i>
-                    </a>
-                    <ul id="dropdown-practitionerIdps" class="dropdown-content"></ul>
-                  </div>
-                  <div class="input-field col s5">
-                    <i class="material-icons prefix">security</i>
-                    <select id="relatedPersonIdps" multiple th:field="*{relatedPersonIdps}">
-                      <optgroup label="Custom IDP">
-                        <option th:each="idp : ${idps}" th:attr="data-idp-id=${idp.id}" th:value="${idp.id}" th:text="${idp.name}"></option>
-                      </optgroup>
-                    </select>
-                    <label for="relatedPersonIdps">Related Person IDPs</label>
-                  </div>
-                  <div class="col s1" style="padding-top: 20px;">
-                    <a href="#!" onclick="copyIdpHint('relatedPersonIdps', this); return false;" class="btn amber tooltipped dropdown-trigger" data-target="dropdown-relatedPersonIdps" data-position="top" data-tooltip="Copy idp_hint">
-                      <i class="material-icons">content_copy</i>
-                    </a>
-                    <ul id="dropdown-relatedPersonIdps" class="dropdown-content"></ul>
-                  </div>
+                <span class="card-title" th:if="${client.id == null}">Nieuwe aanvraag SMART Backend Service</span>
+                <span class="card-title" th:if="${client.id != null}">SMART Backend Service bewerken</span>
+                <div class="row col s12" th:if="${error != null}">
+                  <h6 class="red-text" th:text="${error.message}"></h6>
                 </div>
               </div>
-              <div id="jwks_url" class="col s12">
-                <div class="input-field col s12">
-                  <i class="material-icons prefix">http</i>
-                  <input placeholder="JWKS endpoint" id="jwks_endpoint" name="jwksEndpoint" type="url" class="validate" th:value="${error == null ? client.jwksEndpoint : error.endpoint}">
-                  <label for="jwks_endpoint">JWKS Endpoint</label>
-                  <span class="helper-text"></span>
+              <div class="row">
+                <div class="row">
+                  <div class="col s12">
+                    <div class="input-field col s6">
+                      <i class="material-icons prefix">title</i>
+                      <input id="service-name" placeholder="Servicenaam" name="name" type="text" class="validate"
+                        th:value="${client.name}">
+                      <label for="service-name">Servicenaam</label>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div id="public_key" class="col s12">
-                <div class="input-field col s12">
-                  <textarea id="public_key_textarea" th:value="${client.publicKey}" th:text="${client.publicKey}"
-                            class="materialize-textarea" name="publicKey"
-                            style="min-height: 100px;" placeholder="-----BEGIN PUBLIC KEY-----
+                <div id="jwks_url" class="col s12">
+                  <div class="input-field col s12">
+                    <i class="material-icons prefix">http</i>
+                    <input placeholder="JWKS endpoint" id="jwks_endpoint" name="jwksEndpoint" type="url"
+                      class="validate" th:value="${error == null ? client.jwksEndpoint : error.endpoint}">
+                    <label for="jwks_endpoint">JWKS Endpoint</label>
+                    <span class="helper-text"></span>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col s12">
+                    <!-- Patient IDPs -->
+                    <div th:replace="fragment/dual-list-selector :: idp-selector('Patient IDPs', 'patient', ${idps}, ${client?.patientIdps}, 'patientIdps')"></div>
+
+                    <!-- Practitioner IDPs -->
+                    <div th:replace="fragment/dual-list-selector :: idp-selector('Practitioner IDPs', 'practitioner', ${idps}, ${client?.practitionerIdps}, 'practitionerIdps')"></div>
+
+                    <!-- Related Person IDPs -->
+                    <div th:replace="fragment/dual-list-selector :: idp-selector('Related Person IDPs', 'relatedperson', ${idps}, ${client?.relatedPersonIdps}, 'relatedPersonIdps')"></div>
+                  </div>
+                </div>
+                <div id="public_key" class="col s12">
+                  <div class="input-field col s12">
+                    <textarea id="public_key_textarea" th:value="${client.publicKey}" th:text="${client.publicKey}"
+                      class="materialize-textarea" name="publicKey" style="min-height: 100px;" placeholder="-----BEGIN PUBLIC KEY-----
 MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMeqb5874k8CwSAHmy88vv4pyxUN5C4p
 T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
 -----END PUBLIC KEY-----"></textarea>
-                  <label for="public_key_textarea">RSA512 Key (at least 2048 bits)</label>
+                    <label for="public_key_textarea">RSA512 Key (at least 2048 bits)</label>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="row">
-              <ul id="allowed-uri-collection" class="collection with-header">
-                <li class="collection-header">
-                  <h4>
-                    <span>Allowed redirect_uri values</span>
-                    <div id="add-allowed-redirect-url" class="btn amber right">
-                      <span><i class="material-icons">add</i></span>
+              <div class="row">
+                <ul id="allowed-uri-collection" class="collection with-header">
+                  <li class="collection-header">
+                    <h4>
+                      <span>Allowed redirect_uri values</span>
+                      <div id="add-allowed-redirect-url" class="btn amber right">
+                        <span><i class="material-icons">add</i></span>
+                      </div>
+                    </h4>
+                    <p>
+                      Tijdens het uitvoeren van een SMART launch, wordt er een <code>redirect_uri</code> meegegeven. Om
+                      te
+                      voorkomen dat de redirect naar een ongeautoriseerde partij wordt gestuurd, kunnen hier URIs
+                      geconfigureerd worden die vertrouwd worden.
+                    </p>
+                  </li>
+                  <li id="no-redirect-uri-item" class="collection-item"
+                    th:if="${#lists.isEmpty(client.allowedRedirects)}">
+                    Geen redirect_uri toegevoegd
+                  </li>
+                  <li class="collection-item" th:each="allowedRedirect, redirectStat : *{allowedRedirects}">
+                    <div class="row">
+                      <input class="col s11" type="url" name="allowedRedirects" th:value="${allowedRedirect}" />
+                      <div class="col s1">
+                        <button th:onclick="this.parentNode.parentNode.parentNode.remove()" class="btn amber right">
+                          <span><i class="material-icons">delete</i></span>
+                        </button>
+                      </div>
                     </div>
-                  </h4>
-                  <p>
-                    Tijdens het uitvoeren van een SMART launch, wordt er een <code>redirect_uri</code> meegegeven. Om te
-                    voorkomen dat de redirect naar een ongeautoriseerde partij wordt gestuurd, kunnen hier URIs
-                    geconfigureerd worden die vertrouwd worden.
-                  </p>
-                </li>
-                <li id="no-redirect-uri-item" class="collection-item" th:if="${#lists.isEmpty(client.allowedRedirects)}">
-                  Geen redirect_uri toegevoegd
-                </li>
-                <li class="collection-item" th:each="allowedRedirect, redirectStat : *{allowedRedirects}">
-                  <div class="row">
-                    <input class="col s11" type="url" name="allowedRedirects" th:value="${allowedRedirect}" />
-                    <div class="col s1">
-                      <button th:onclick="this.parentNode.parentNode.parentNode.remove()" class="btn amber right">
-                        <span><i class="material-icons">delete</i></span>
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              </ul>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-          <div class="card-action">
-            <button disabled id="submit-button" class="btn waves-effect waves-light amber darken-1" type="submit" name="action">Submit
-              <i class="material-icons right">send</i>
-            </button>
-          </div>
-          <input type="hidden" th:field="*{id}" />
-        </form>
+            <div class="card-action">
+              <button disabled id="submit-button" class="btn waves-effect waves-light amber darken-1" type="submit"
+                name="action">Submit
+                <i class="material-icons right">send</i>
+              </button>
+            </div>
+            <input type="hidden" th:field="*{id}" />
+          </form>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </body>
 
 <!--JavaScript at end of body for optimized loading-->
 <script type="text/javascript" src="/js/materialize.min.js"></script>
 <script th:inline="javascript">
-  (function()  {
+  (function () {
     M.Tabs.init(document.getElementById('card-tabs'));
-    M.FormSelect.init(document.querySelectorAll('select'));
+    M.FormSelect.init(document.querySelectorAll('select:not(#patientIdps):not(#practitionerIdps):not(#relatedPersonIdps)'));
     M.textareaAutoResize(document.getElementById('public_key_textarea'));
     M.Tooltip.init(document.querySelectorAll('.tooltipped'));
 
@@ -161,7 +130,7 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
 
     addAllowedRedirectButton.addEventListener('click', () => {
       const defaultValue = document.getElementById('no-redirect-uri-item');
-      if(defaultValue) {
+      if (defaultValue) {
         defaultValue.remove()
       }
 
@@ -169,23 +138,23 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
       redirectUriLi.classList.add('collection-item')
 
       redirectUriLi.innerHTML = '<div class="row">\n' +
-          '                    <input class="col s11" type="url" name="allowedRedirects" />\n' +
-          '                    <div class="col s1">\n' +
-          '                      <button onclick="this.parentNode.parentNode.parentNode.remove()" class="btn amber right">\n' +
-          '                        <span><i class="material-icons">delete</i></span>\n' +
-          '                      </button>\n' +
-          '                    </div>\n' +
-          '                  </div>'
+        '                    <input class="col s11" type="url" name="allowedRedirects" />\n' +
+        '                    <div class="col s1">\n' +
+        '                      <button onclick="this.parentNode.parentNode.parentNode.remove()" class="btn amber right">\n' +
+        '                        <span><i class="material-icons">delete</i></span>\n' +
+        '                      </button>\n' +
+        '                    </div>\n' +
+        '                  </div>'
 
       allowedRedirectCollection.appendChild(redirectUriLi);
     })
 
-    let registeredEndpoints = /*[[${registeredEndpoints}]]*/ [];
+    let registeredEndpoints = /*[[${registeredEndpoints}]]*/[];
     registeredEndpoints = registeredEndpoints
-        .filter((endpoint) => endpoint != [[${client.jwksEndpoint}]]) //exclude own endpoint for updating existing
-        .map((endpoint) => endpoint.replaceAll("\\", ""))
+      .filter((endpoint) => endpoint != [[${ client.jwksEndpoint }]]) //exclude own endpoint for updating existing
+      .map((endpoint) => endpoint.replaceAll("\\", ""))
 
-    const validateJwksUrl = function(event) {
+    const validateJwksUrl = function (event) {
       const input = event.target;
       const value = input.value;
 
@@ -198,29 +167,29 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
         isHttp = url.protocol === "https:" || url.protocol === "http:";
 
         isUnique = !registeredEndpoints.includes(value);
-      } catch (_) {}
+      } catch (_) { }
 
-      const valid = (isHttp || [[${allowHttpHosts}]]) && isUnique;
+      const valid = (isHttp || [[${ allowHttpHosts }]]) && isUnique;
       updateSaveButton(valid);
-      if(valid) {
+      if (valid) {
         input.setCustomValidity("");
       } else {
-        if(!isHttp) input.setCustomValidity("HTTP(S) endpoint vereist");
-        else if(!isUnique) input.setCustomValidity("Endpoint niet meer beschikbaar");
+        if (!isHttp) input.setCustomValidity("HTTP(S) endpoint vereist");
+        else if (!isUnique) input.setCustomValidity("Endpoint niet meer beschikbaar");
       }
 
       input.reportValidity();
     };
 
-    const validatePublicKey = function(event) {
+    const validatePublicKey = function (event) {
       updateSaveButton(!!event.target.value)
     };
 
-    const updateSaveButton = function(isValid) {
+    const updateSaveButton = function (isValid) {
 
       const saveButton = document.getElementById('submit-button');
 
-      if(isValid) {
+      if (isValid) {
         saveButton.removeAttribute("disabled");
       } else {
         saveButton.setAttribute("disabled", "true");
@@ -233,52 +202,24 @@ T6Ryb4bB4HPj0eHSJMrNIr9+eeQBkq1rbZUFoJIxZJc5PO8uoug/XfsCAwEAAQ==
     const textarea = document.getElementById('public_key_textarea');
     textarea.addEventListener('keyup', validatePublicKey, true);
 
-    updateSaveButton([[${client.id != null}]])
+    updateSaveButton([[${ client.id != null }]])
+  })();
+</script>
 
-    // Initialize dropdowns
-    const dropdownElems = document.querySelectorAll('.dropdown-trigger');
-    M.Dropdown.init(dropdownElems, {
-      constrainWidth: false,
-      coverTrigger: false
-    });
+<!-- Dual-list selector script and initialization -->
+<div th:replace="fragment/dual-list-selector :: scripts"></div>
+<script th:inline="javascript">
+  // Initialize dual-list selectors for IDPs
+  (function() {
+    const idpTypes = [
+      { available: 'available-patient-idps', selected: 'selected-patient-idps', hiddenSelect: 'patientIdps' },
+      { available: 'available-practitioner-idps', selected: 'selected-practitioner-idps', hiddenSelect: 'practitionerIdps' },
+      { available: 'available-relatedperson-idps', selected: 'selected-relatedperson-idps', hiddenSelect: 'relatedPersonIdps' }
+    ];
 
-    // Copy IDP hint functionality
-    window.copyIdpHint = function(selectId, button) {
-      const select = document.getElementById(selectId);
-      const selectedOptions = Array.from(select.selectedOptions);
-
-      if (selectedOptions.length === 0) {
-        M.toast({html: 'Please select at least one IDP first', classes: 'orange'});
-        return false;
-      }
-
-      if (selectedOptions.length === 1) {
-        // Only one IDP selected, copy directly
-        copyToClipboard(selectedOptions[0].value);
-        return false;
-      } else {
-        // Multiple IDPs, populate and show dropdown
-        const dropdownId = button.getAttribute('data-target');
-        const dropdown = document.getElementById(dropdownId);
-
-        dropdown.innerHTML = selectedOptions.map(opt =>
-          `<li><a href="#!" onclick="copyToClipboard('${opt.value}'); return false;">${opt.text}</a></li>`
-        ).join('');
-
-        // Reinitialize dropdown after content change
-        const instance = M.Dropdown.getInstance(button);
-        instance.open();
-        return false;
-      }
-    };
-
-    window.copyToClipboard = function(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        M.toast({html: 'IDP ID copied to clipboard!', classes: 'green'});
-      }).catch(err => {
-        M.toast({html: 'Failed to copy: ' + err, classes: 'red'});
-      });
-    };
+    if (typeof initializeDualListSelectors === 'function') {
+      initializeDualListSelectors(idpTypes);
+    }
   })();
 </script>
 

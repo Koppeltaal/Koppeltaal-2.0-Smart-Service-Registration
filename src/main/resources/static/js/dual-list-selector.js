@@ -1,0 +1,397 @@
+/**
+ * Dual-List IDP Selector with Drag & Drop functionality
+ * Manages ordered selection of Identity Providers with visual drag-and-drop interface
+ */
+(function() {
+  'use strict';
+
+  // Initialize all dual-list selectors on the page
+  window.initializeDualListSelectors = function(idpTypes) {
+    idpTypes.forEach(idpType => {
+      initializeIdpDragDrop(idpType.available, idpType.selected, idpType.hiddenSelect);
+    });
+  };
+
+  function initializeIdpDragDrop(availableId, selectedId, hiddenSelectId) {
+    const availableList = document.getElementById(availableId);
+    const selectedList = document.getElementById(selectedId);
+    const hiddenSelect = document.getElementById(hiddenSelectId);
+
+    if (!availableList || !selectedList || !hiddenSelect) {
+      console.warn('Missing elements for dual-list selector:', { availableId, selectedId, hiddenSelectId });
+      return;
+    }
+
+    // Hide already selected IDPs from available list
+    syncAvailableList(availableList, selectedList);
+
+    // Setup drag & drop for available list items
+    availableList.querySelectorAll('li').forEach(item => {
+      setupDragListeners(item, availableList, selectedList, hiddenSelect);
+    });
+
+    // Setup drag & drop for selected list items (for reordering)
+    selectedList.querySelectorAll('li').forEach(item => {
+      setupDragListeners(item, selectedList, selectedList, hiddenSelect);
+      setupRemoveButton(item, availableList, selectedList, hiddenSelect);
+      setupCopyButton(item);
+    });
+
+    // Setup drop zones
+    setupDropZone(availableList, selectedList, hiddenSelect);
+    setupDropZone(selectedList, selectedList, hiddenSelect);
+
+    // Initialize default labels
+    updateDefaultLabels(selectedList);
+  }
+
+  function setupDragListeners(item, sourceList, targetList, hiddenSelect) {
+    item.addEventListener('dragstart', (e) => {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', item.innerHTML);
+      e.dataTransfer.setData('idp-id', item.getAttribute('data-idp-id'));
+      e.dataTransfer.setData('source-list', sourceList.id);
+      item.classList.add('dragging');
+    });
+
+    item.addEventListener('dragend', (e) => {
+      item.classList.remove('dragging');
+    });
+  }
+
+  function setupDropZone(dropZone, selectedList, hiddenSelect) {
+    dropZone.addEventListener('dragover', (e) => {
+      const dragging = document.querySelector('.dragging');
+      if (!dragging) return;
+
+      // Get the source list ID from the dragging element's parent
+      const sourceList = dragging.parentElement;
+      if (!sourceList) return;
+
+      const sourceActorType = getActorType(sourceList.id);
+      const targetActorType = getActorType(dropZone.id);
+
+      // Only allow drop within same actor type
+      if (sourceActorType !== targetActorType) {
+        e.dataTransfer.dropEffect = 'none';
+        return;
+      }
+
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+
+      const afterElement = getDragAfterElement(dropZone, e.clientY);
+
+      if (afterElement == null) {
+        dropZone.appendChild(dragging);
+      } else {
+        dropZone.insertBefore(dragging, afterElement);
+      }
+
+      // Update default labels if moving within or to a selected list
+      if (dropZone.id.includes('selected')) {
+        updateDefaultLabels(dropZone);
+      }
+
+      // If item came from a selected list, update that list too
+      if (sourceList && sourceList.id.includes('selected')) {
+        updateDefaultLabels(sourceList);
+      }
+
+      // If moving to available list, cleanup the item
+      if (dropZone.id.includes('available')) {
+        cleanupAvailableItem(dragging);
+      }
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const sourceListId = e.dataTransfer.getData('source-list');
+      const sourceList = document.getElementById(sourceListId);
+      const idpId = e.dataTransfer.getData('idp-id');
+      const dragging = document.querySelector('.dragging');
+
+      const sourceActorType = getActorType(sourceListId);
+      const targetActorType = getActorType(dropZone.id);
+
+      // Prevent cross-actor-type dragging
+      if (sourceActorType !== targetActorType) {
+        return;
+      }
+
+      // Determine available and selected lists based on IDs
+      const availableListId = dropZone.id.includes('available')
+        ? dropZone.id
+        : dropZone.id.replace('selected', 'available');
+      const selectedListId = dropZone.id.includes('selected')
+        ? dropZone.id
+        : dropZone.id.replace('available', 'selected');
+      const availableListEl = document.getElementById(availableListId);
+      const selectedListEl = document.getElementById(selectedListId);
+
+      // If moving from available to selected, update styling
+      if (sourceListId.includes('available') && dropZone.id.includes('selected')) {
+        dragging.style.backgroundColor = '#e0f2f1';
+        dragging.style.padding = '8px 10px';
+
+        // Ensure flexbox styling
+        dragging.style.display = 'flex';
+        dragging.style.alignItems = 'center';
+
+        // Ensure span has class for name
+        const nameSpan = dragging.querySelector('span');
+        if (nameSpan && !nameSpan.classList.contains('idp-name')) {
+          nameSpan.classList.add('idp-name');
+        }
+        if (nameSpan) {
+          nameSpan.style.flex = '1';
+        }
+
+        // Add copy button if not exists
+        if (!dragging.querySelector('.copy-idp')) {
+          const copyBtn = document.createElement('a');
+          copyBtn.href = '#!';
+          copyBtn.className = 'secondary-content copy-idp';
+          copyBtn.setAttribute('data-idp-id', idpId);
+          copyBtn.style.marginLeft = '8px';
+          copyBtn.style.position = 'static';
+          copyBtn.innerHTML = '<i class="material-icons" style="font-size: 18px;">content_copy</i>';
+          dragging.appendChild(copyBtn);
+          setupCopyButton(dragging);
+        }
+        // Add remove button if not exists
+        if (!dragging.querySelector('.remove-idp')) {
+          const removeBtn = document.createElement('a');
+          removeBtn.href = '#!';
+          removeBtn.className = 'secondary-content remove-idp';
+          removeBtn.setAttribute('data-idp-id', idpId);
+          removeBtn.style.marginLeft = '12px';
+          removeBtn.style.position = 'static';
+          removeBtn.innerHTML = '<i class="material-icons" style="font-size: 18px;">close</i>';
+          dragging.appendChild(removeBtn);
+          setupRemoveButton(dragging, availableListEl, selectedListEl, hiddenSelect);
+        }
+      }
+
+      // If moving from selected to available, remove styling and buttons
+      if (sourceListId.includes('selected') && dropZone.id.includes('available')) {
+        cleanupAvailableItem(dragging);
+      }
+
+      // Update hidden select based on selected list
+      syncHiddenSelect(selectedListEl, hiddenSelect);
+
+      // Hide/show items in available list based on what's selected
+      syncAvailableList(availableListEl, selectedListEl);
+
+      // Update default labels
+      updateDefaultLabels(selectedListEl);
+    });
+  }
+
+  function setupRemoveButton(item, availableList, selectedList, hiddenSelect) {
+    const removeBtn = item.querySelector('.remove-idp');
+    if (removeBtn) {
+      removeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const idpId = item.getAttribute('data-idp-id');
+
+        // Remove from selected list
+        item.remove();
+
+        // Show in available list
+        syncAvailableList(availableList, selectedList);
+
+        // Update hidden select
+        syncHiddenSelect(selectedList, hiddenSelect);
+
+        // Update default labels
+        updateDefaultLabels(selectedList);
+      });
+    }
+  }
+
+  function setupCopyButton(item) {
+    const copyBtn = item.querySelector('.copy-idp');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const idpId = item.getAttribute('data-idp-id');
+        copyToClipboard(idpId);
+      });
+    }
+  }
+
+  function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element: child };
+      } else {
+        return closest;
+      }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  }
+
+  function syncHiddenSelect(selectedList, hiddenSelect) {
+    const select = typeof hiddenSelect === 'string'
+      ? document.getElementById(hiddenSelect)
+      : hiddenSelect;
+
+    if (!select) {
+      console.error('Hidden select not found:', hiddenSelect);
+      return;
+    }
+
+    // Clear all selections
+    Array.from(select.options).forEach(opt => opt.selected = false);
+
+    // Select in order
+    const selectedItems = selectedList.querySelectorAll('li');
+    selectedItems.forEach(item => {
+      const idpId = item.getAttribute('data-idp-id');
+      const option = select.querySelector(`option[value="${idpId}"]`);
+      if (option) option.selected = true;
+    });
+  }
+
+  function syncAvailableList(availableList, selectedList) {
+    const selectedIds = Array.from(selectedList.querySelectorAll('li')).map(item => item.getAttribute('data-idp-id'));
+
+    // Track which IDs we've seen to remove duplicates
+    const seenIds = new Set();
+
+    availableList.querySelectorAll('li').forEach(item => {
+      const idpId = item.getAttribute('data-idp-id');
+
+      // If this is a duplicate (we've seen this ID already), remove it
+      if (seenIds.has(idpId)) {
+        item.remove();
+        return;
+      }
+
+      seenIds.add(idpId);
+
+      // Hide if selected, show if not selected
+      if (selectedIds.includes(idpId)) {
+        item.style.display = 'none';
+      } else {
+        // Ensure proper flexbox styling when showing
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+      }
+    });
+  }
+
+  function getActorType(listId) {
+    if (listId.includes('patient')) return 'patient';
+    if (listId.includes('practitioner')) return 'practitioner';
+    if (listId.includes('relatedperson')) return 'relatedperson';
+    return null;
+  }
+
+  function getHiddenSelectId(selectedListId) {
+    if (selectedListId.includes('patient')) return 'patientIdps';
+    if (selectedListId.includes('practitioner')) return 'practitionerIdps';
+    if (selectedListId.includes('relatedperson')) return 'relatedPersonIdps';
+    return null;
+  }
+
+  function updateDefaultLabels(selectedList) {
+    const items = selectedList.querySelectorAll('li');
+    items.forEach((item, index) => {
+      // Ensure consistent styling for selected items
+      item.style.backgroundColor = '#e0f2f1';
+      item.style.padding = '8px 10px';
+      item.style.cursor = 'move';
+      item.style.display = 'flex';
+      item.style.alignItems = 'center';
+
+      // Ensure span has idp-name class and flex styling
+      const nameSpan = item.querySelector('span');
+      if (nameSpan && !nameSpan.classList.contains('idp-name')) {
+        nameSpan.classList.add('idp-name');
+      }
+      if (nameSpan) {
+        nameSpan.style.flex = '1';
+      }
+
+      // Update name with default label
+      if (nameSpan) {
+        const baseName = item.getAttribute('data-idp-name');
+        if (index === 0 && items.length > 0) {
+          nameSpan.textContent = baseName + ' (default)';
+        } else {
+          nameSpan.textContent = baseName;
+        }
+      }
+
+      // Ensure all items in selected list have copy and remove buttons
+      const idpId = item.getAttribute('data-idp-id');
+
+      if (!item.querySelector('.copy-idp')) {
+        const copyBtn = document.createElement('a');
+        copyBtn.href = '#!';
+        copyBtn.className = 'secondary-content copy-idp';
+        copyBtn.setAttribute('data-idp-id', idpId);
+        copyBtn.style.marginLeft = '8px';
+        copyBtn.style.position = 'static';
+        copyBtn.innerHTML = '<i class="material-icons" style="font-size: 18px;">content_copy</i>';
+        item.appendChild(copyBtn);
+        setupCopyButton(item);
+      }
+
+      if (!item.querySelector('.remove-idp')) {
+        const removeBtn = document.createElement('a');
+        removeBtn.href = '#!';
+        removeBtn.className = 'secondary-content remove-idp';
+        removeBtn.setAttribute('data-idp-id', idpId);
+        removeBtn.style.marginLeft = '12px';
+        removeBtn.style.position = 'static';
+        removeBtn.innerHTML = '<i class="material-icons" style="font-size: 18px;">close</i>';
+        item.appendChild(removeBtn);
+
+        // Get the lists for the remove button handler
+        const availableListId = selectedList.id.replace('selected', 'available');
+        const availableList = document.getElementById(availableListId);
+        const hiddenSelectId = getHiddenSelectId(selectedList.id);
+        const hiddenSelect = document.getElementById(hiddenSelectId);
+        setupRemoveButton(item, availableList, selectedList, hiddenSelect);
+      }
+    });
+  }
+
+  function cleanupAvailableItem(item) {
+    // Reset styling
+    item.style.backgroundColor = '';
+    item.style.padding = '8px 10px';
+    item.style.display = 'flex';
+    item.style.alignItems = 'center';
+
+    // Remove buttons
+    const removeBtn = item.querySelector('.remove-idp');
+    if (removeBtn) removeBtn.remove();
+    const copyBtn = item.querySelector('.copy-idp');
+    if (copyBtn) copyBtn.remove();
+
+    // Reset name (remove "(default)" if present)
+    const nameSpan = item.querySelector('.idp-name');
+    if (nameSpan) {
+      const baseName = item.getAttribute('data-idp-name');
+      nameSpan.textContent = baseName;
+      nameSpan.style.flex = '';
+    }
+  }
+
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      M.toast({ html: 'IDP ID copied to clipboard!', classes: 'green' });
+    }).catch(err => {
+      M.toast({ html: 'Failed to copy: ' + err, classes: 'red' });
+    });
+  }
+})();
