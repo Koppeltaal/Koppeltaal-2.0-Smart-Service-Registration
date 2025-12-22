@@ -2,6 +2,7 @@ package nl.koppeltaal.smartserviceregistration.controller;
 
 import nl.koppeltaal.smartserviceregistration.model.IdentityProvider;
 import nl.koppeltaal.smartserviceregistration.repository.IdentityProviderRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -43,21 +44,31 @@ public class IdentityProviderController {
   }
 
   @PostMapping("details")
-  public String upsert(@ModelAttribute IdentityProvider identityProvider, HttpSession session) {
+  public String upsert(@ModelAttribute IdentityProvider identityProvider, HttpSession session, Model model) {
     identityProvider.setCreatedBy((String) session.getAttribute("user"));
 
-    if(identityProvider.getId() != null) {
-      IdentityProvider existingIdentityProvider = repository.findById(identityProvider.getId()).orElseThrow();
+    try {
+      if(identityProvider.getId() != null) {
+        IdentityProvider existingIdentityProvider = repository.findById(identityProvider.getId()).orElseThrow();
 
-      existingIdentityProvider.setName(identityProvider.getName());
-      existingIdentityProvider.setOpenidConfigEndpoint(identityProvider.getOpenidConfigEndpoint());
-      existingIdentityProvider.setClientId(identityProvider.getClientId());
-      existingIdentityProvider.setClientSecret(identityProvider.getClientSecret());
-      existingIdentityProvider.setUsernameAttribute(identityProvider.getUsernameAttribute());
+        existingIdentityProvider.setName(identityProvider.getName());
+        existingIdentityProvider.setLogicalIdentifier(identityProvider.getLogicalIdentifier());
+        existingIdentityProvider.setOpenidConfigEndpoint(identityProvider.getOpenidConfigEndpoint());
+        existingIdentityProvider.setClientId(identityProvider.getClientId());
+        existingIdentityProvider.setClientSecret(identityProvider.getClientSecret());
+        existingIdentityProvider.setUsernameAttribute(identityProvider.getUsernameAttribute());
 
-      repository.save(existingIdentityProvider);
-    } else {
-      repository.save(identityProvider);
+        repository.save(existingIdentityProvider);
+      } else {
+        repository.save(identityProvider);
+      }
+    } catch (DataIntegrityViolationException e) {
+      if (e.getMessage() != null && e.getMessage().contains("idx_identity_provider_logical_identifier")) {
+        model.addAttribute("idp", identityProvider);
+        model.addAttribute("logicalIdentifierError", "Deze logical identifier is al in gebruik");
+        return "idp_details";
+      }
+      throw e;
     }
 
     return "redirect:/idp";

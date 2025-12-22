@@ -9,6 +9,8 @@ import jakarta.persistence.Table;
 public class IdentityProvider extends DbEntity {
 
     private String name;
+    @Column(name = "logical_identifier", unique = true)
+    private String logicalIdentifier;
     @Column(name = "openid_config_endpoint")
     private String openidConfigEndpoint;
     @Column(name = "client_id")
@@ -24,6 +26,14 @@ public class IdentityProvider extends DbEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getLogicalIdentifier() {
+        return logicalIdentifier;
+    }
+
+    public void setLogicalIdentifier(String logicalIdentifier) {
+        this.logicalIdentifier = logicalIdentifier;
     }
 
     public String getOpenidConfigEndpoint() {
@@ -62,6 +72,7 @@ public class IdentityProvider extends DbEntity {
     public String toString() {
         return "IdentityProvider{" +
                 "name='" + name + '\'' +
+                ", logicalIdentifier='" + logicalIdentifier + '\'' +
                 ", openidConfigEndpoint='" + openidConfigEndpoint + '\'' +
                 ", clientId='" + clientId + '\'' +
                 ", clientSecret='" + clientSecret + '\'' +

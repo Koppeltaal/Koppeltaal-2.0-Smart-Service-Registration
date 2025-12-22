@@ -23,7 +23,14 @@
                            th:value="${idp.name}">
                     <label for="service-name">Naam</label>
                   </div>
-                  <div class="input-field col s8">
+                  <div class="input-field col s4">
+                    <i class="material-icons prefix">fingerprint</i>
+                    <input id="logical-identifier" placeholder="my-idp" name="logicalIdentifier" type="text" class="validate"
+                           th:value="${idp.logicalIdentifier}" th:classappend="${logicalIdentifierError} ? 'invalid' : ''">
+                    <label for="logical-identifier">Logical Identifier (idp_hint)</label>
+                    <span class="helper-text" th:attr="data-error=${logicalIdentifierError}"></span>
+                  </div>
+                  <div class="input-field col s4">
                     <i class="material-icons prefix">http</i>
                     <input id="idp-endpoint" placeholder="https://my.idp.com/.well-known/openid-configuration" name="openidConfigEndpoint" type="url" class="validate"
                            th:value="${idp.openidConfigEndpoint}"/>

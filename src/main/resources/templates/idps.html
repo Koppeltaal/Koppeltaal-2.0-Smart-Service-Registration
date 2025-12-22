@@ -9,6 +9,7 @@
     <thead>
     <tr>
       <th>Naam</th>
+      <th>Logical Identifier</th>
       <th>OpenID Config Endpoint</th>
       <th>client_id</th>
       <th>Username Attribuut</th>
@@ -18,6 +19,7 @@
     <tbody>
     <tr th:each="idp, idpStat : ${idps}" th:attr="data-idp-id=${idp.id}">
       <td th:text="${idp.name}"/>
+      <td th:text="${idp.logicalIdentifier}"/>
       <td th:text="${idp.openidConfigEndpoint}"/>
       <td th:text="${idp.clientId}"/>
       <td th:text="${idp.usernameAttribute}"/>
