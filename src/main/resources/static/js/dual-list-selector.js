@@ -145,17 +145,34 @@
           nameSpan.style.flex = '1';
         }
 
-        // Add copy button if not exists
-        if (!dragging.querySelector('.copy-idp')) {
-          const copyBtn = document.createElement('a');
-          copyBtn.href = '#!';
-          copyBtn.className = 'secondary-content copy-idp';
-          copyBtn.setAttribute('data-idp-id', idpId);
-          copyBtn.style.marginLeft = '8px';
-          copyBtn.style.position = 'static';
-          copyBtn.innerHTML = '<i class="material-icons" style="font-size: 18px;">content_copy</i>';
-          dragging.appendChild(copyBtn);
-          setupCopyButton(dragging);
+        // Add copy button if not exists and logical ID is available
+        const logicalId = dragging.getAttribute('data-logical-id');
+        if (!dragging.querySelector('.copy-idp') && !dragging.querySelector('.copy-idp-disabled')) {
+          if (logicalId) {
+            const copyBtn = document.createElement('a');
+            copyBtn.href = '#!';
+            copyBtn.className = 'secondary-content copy-idp tooltipped';
+            copyBtn.setAttribute('data-logical-id', logicalId);
+            copyBtn.setAttribute('data-position', 'top');
+            copyBtn.setAttribute('data-tooltip', 'Copy Logical Identifier');
+            copyBtn.style.marginLeft = '8px';
+            copyBtn.style.position = 'static';
+            copyBtn.innerHTML = '<i class="material-icons" style="font-size: 18px;">content_copy</i>';
+            dragging.appendChild(copyBtn);
+            setupCopyButton(dragging);
+            M.Tooltip.init(copyBtn);
+          } else {
+            const disabledSpan = document.createElement('span');
+            disabledSpan.className = 'secondary-content copy-idp-disabled tooltipped';
+            disabledSpan.setAttribute('data-position', 'top');
+            disabledSpan.setAttribute('data-tooltip', 'Geen logical identifier toegekend');
+            disabledSpan.style.marginLeft = '8px';
+            disabledSpan.style.position = 'static';
+            disabledSpan.style.color = '#ccc';
+            disabledSpan.innerHTML = '<i class="material-icons" style="font-size: 18px;">content_copy</i>';
+            dragging.appendChild(disabledSpan);
+            M.Tooltip.init(disabledSpan);
+          }
         }
       }
 
@@ -177,8 +194,10 @@
     if (copyBtn) {
       copyBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        const idpId = item.getAttribute('data-idp-id');
-        copyToClipboard(idpId);
+        const logicalId = copyBtn.getAttribute('data-logical-id');
+        if (logicalId) {
+          copyToClipboard(logicalId);
+        }
       });
     }
   }
@@ -262,19 +281,35 @@
         }
       }
 
-      // Ensure all items in selected list have copy and remove buttons
-      const idpId = item.getAttribute('data-idp-id');
+      // Ensure all items in selected list have copy button (or disabled indicator)
+      const logicalId = item.getAttribute('data-logical-id');
 
-      if (!item.querySelector('.copy-idp')) {
-        const copyBtn = document.createElement('a');
-        copyBtn.href = '#!';
-        copyBtn.className = 'secondary-content copy-idp';
-        copyBtn.setAttribute('data-idp-id', idpId);
-        copyBtn.style.marginLeft = '8px';
-        copyBtn.style.position = 'static';
-        copyBtn.innerHTML = '<i class="material-icons" style="font-size: 18px;">content_copy</i>';
-        item.appendChild(copyBtn);
-        setupCopyButton(item);
+      if (!item.querySelector('.copy-idp') && !item.querySelector('.copy-idp-disabled')) {
+        if (logicalId) {
+          const copyBtn = document.createElement('a');
+          copyBtn.href = '#!';
+          copyBtn.className = 'secondary-content copy-idp tooltipped';
+          copyBtn.setAttribute('data-logical-id', logicalId);
+          copyBtn.setAttribute('data-position', 'top');
+          copyBtn.setAttribute('data-tooltip', 'Copy Logical Identifier');
+          copyBtn.style.marginLeft = '8px';
+          copyBtn.style.position = 'static';
+          copyBtn.innerHTML = '<i class="material-icons" style="font-size: 18px;">content_copy</i>';
+          item.appendChild(copyBtn);
+          setupCopyButton(item);
+          M.Tooltip.init(copyBtn);
+        } else {
+          const disabledSpan = document.createElement('span');
+          disabledSpan.className = 'secondary-content copy-idp-disabled tooltipped';
+          disabledSpan.setAttribute('data-position', 'top');
+          disabledSpan.setAttribute('data-tooltip', 'Geen logical identifier toegekend');
+          disabledSpan.style.marginLeft = '8px';
+          disabledSpan.style.position = 'static';
+          disabledSpan.style.color = '#ccc';
+          disabledSpan.innerHTML = '<i class="material-icons" style="font-size: 18px;">content_copy</i>';
+          item.appendChild(disabledSpan);
+          M.Tooltip.init(disabledSpan);
+        }
       }
     });
   }
@@ -286,9 +321,11 @@
     item.style.display = 'flex';
     item.style.alignItems = 'center';
 
-    // Remove copy button
+    // Remove copy button or disabled indicator
     const copyBtn = item.querySelector('.copy-idp');
     if (copyBtn) copyBtn.remove();
+    const disabledSpan = item.querySelector('.copy-idp-disabled');
+    if (disabledSpan) disabledSpan.remove();
 
     // Reset name (remove "(default)" if present)
     const nameSpan = item.querySelector('.idp-name');
@@ -301,7 +338,7 @@
 
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-      M.toast({ html: 'IDP ID copied to clipboard!', classes: 'green' });
+      M.toast({ html: 'Logical identifier copied to clipboard!', classes: 'green' });
     }).catch(err => {
       M.toast({ html: 'Failed to copy: ' + err, classes: 'red' });
     });

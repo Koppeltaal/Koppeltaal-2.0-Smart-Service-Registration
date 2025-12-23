@@ -24,7 +24,10 @@
       <td th:text="${idp.clientId}"/>
       <td th:text="${idp.usernameAttribute}"/>
       <td>
-        <a href="#!" class="btn amber copy-idp-id tooltipped" th:attr="data-idp-id=${idp.id}" data-position="top" data-tooltip="Copy ID">
+        <a th:if="${not #strings.isEmpty(idp.logicalIdentifier)}" href="#!" class="btn amber copy-idp-id tooltipped" th:attr="data-logical-id=${idp.logicalIdentifier}" data-position="top" data-tooltip="Copy Logical Identifier">
+          <i class="material-icons">content_copy</i>
+        </a>
+        <a th:if="${#strings.isEmpty(idp.logicalIdentifier)}" href="#!" class="btn amber disabled tooltipped" data-position="top" data-tooltip="Geen logical identifier toegekend">
           <i class="material-icons">content_copy</i>
         </a>
         <a th:href="@{/idp/details/{id}(id=${idp.id})}">
@@ -54,7 +57,7 @@
 
     window.copyToClipboard = function(text) {
       navigator.clipboard.writeText(text).then(() => {
-        M.toast({html: 'IDP ID copied to clipboard!', classes: 'green'});
+        M.toast({html: 'Logical identifier copied to clipboard!', classes: 'green'});
       }).catch(err => {
         M.toast({html: 'Failed to copy: ' + err, classes: 'red'});
       });
@@ -63,8 +66,8 @@
     document.querySelectorAll('.copy-idp-id').forEach(copyButton => {
       copyButton.addEventListener('click', (e) => {
         e.preventDefault();
-        const idpId = copyButton.getAttribute('data-idp-id');
-        copyToClipboard(idpId);
+        const logicalId = copyButton.getAttribute('data-logical-id');
+        copyToClipboard(logicalId);
       });
     });
 

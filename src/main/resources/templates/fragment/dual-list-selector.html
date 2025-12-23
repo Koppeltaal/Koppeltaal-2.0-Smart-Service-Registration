@@ -23,7 +23,7 @@
         <ul th:id="${'available-' + actorType + '-idps'}" class="collection"
           style="min-height: 80px; border: 1px dashed #ccc; margin: 0;">
           <li class="collection-item" th:each="idp : ${availableItems}"
-            th:attr="data-idp-id=${idp.id},data-idp-name=${idp.name}" draggable="true"
+            th:attr="data-idp-id=${idp.id},data-idp-name=${idp.name},data-logical-id=${idp.logicalIdentifier}" draggable="true"
             style="cursor: move; padding: 8px 10px; display: flex; align-items: center;">
             <i class="material-icons tiny" style="margin-right: 8px; font-size: 16px;">drag_indicator</i>
             <span th:text="${idp.name}"></span>
@@ -45,14 +45,18 @@
         <ul th:id="${'selected-' + actorType + '-idps'}" class="collection"
           style="min-height: 80px; border: 1px solid #26a69a; margin: 0;">
           <li class="collection-item" th:each="idp : ${selectedItems}"
-            th:attr="data-idp-id=${idp.id},data-idp-name=${idp.name}" draggable="true"
+            th:attr="data-idp-id=${idp.id},data-idp-name=${idp.name},data-logical-id=${idp.logicalIdentifier}" draggable="true"
             style="cursor: move; background-color: #e0f2f1; padding: 8px 10px; display: flex; align-items: center;">
             <i class="material-icons tiny" style="margin-right: 8px; font-size: 16px;">drag_indicator</i>
             <span class="idp-name" th:text="${idp.name}" style="flex: 1;"></span>
-            <a href="#!" class="secondary-content copy-idp" th:attr="data-idp-id=${idp.id}"
-              style="margin-left: 8px; position: static;">
+            <a th:if="${not #strings.isEmpty(idp.logicalIdentifier)}" href="#!" class="secondary-content copy-idp tooltipped" th:attr="data-logical-id=${idp.logicalIdentifier}"
+              style="margin-left: 8px; position: static;" data-position="top" data-tooltip="Copy Logical Identifier">
               <i class="material-icons" style="font-size: 18px;">content_copy</i>
             </a>
+            <span th:if="${#strings.isEmpty(idp.logicalIdentifier)}" class="secondary-content copy-idp-disabled tooltipped"
+              style="margin-left: 8px; position: static; color: #ccc;" data-position="top" data-tooltip="Geen logical identifier toegekend">
+              <i class="material-icons" style="font-size: 18px;">content_copy</i>
+            </span>
           </li>
         </ul>
       </div>
