@@ -124,6 +124,7 @@ public class SmartServiceService {
 
     try {
       ensureDevices(); //repair any services missing a Device on server boot
+      reconcileDeviceStatuses(); //repair Device statuses that drifted from this administration
     } catch (Exception e) {
       LOG.error("Failed to ensure Devices on server boot, gracefully continuing", e);
     }
@@ -134,6 +135,7 @@ public class SmartServiceService {
   public void ensureDevicesJob() {
     LOG.info("CRON - Ensuring devices");
     ensureDevices();
+    reconcileDeviceStatuses();
   }
 
   public void ensureDevices() {
@@ -157,7 +159,7 @@ public class SmartServiceService {
 
     Device device = new Device();
     device.setDeviceName(Collections.singletonList(name));
-    device.setStatus(FHIRDeviceStatus.ACTIVE);
+    device.setStatus(expectedDeviceStatus(smartService.getStatus()));
 
     final Identifier clientIdIdentifier = new Identifier();
     clientIdIdentifier.setSystem(CLIENT_ID_SYSTEM);
@@ -230,7 +232,9 @@ public class SmartServiceService {
         smartService.getStatus(), status);
 
     smartService.setStatus(status);
-    return repository.save(smartService);
+    final SmartService saved = repository.save(smartService);
+    syncDeviceStatus(saved);
+    return saved;
   }
 
   public SmartService updateSmartServiceName(UUID id, String name, String user) {
@@ -299,6 +303,7 @@ public class SmartServiceService {
     final SmartService smartService = optionalSmartService.get();
 
     LOG.info("User [{}] deleted SmartService {}.", user, smartService);
+    markDeviceStatus(smartService, FHIRDeviceStatus.INACTIVE);
     repository.delete(smartService);
   }
 
@@ -350,6 +355,121 @@ public class SmartServiceService {
     }));
 
     LOG.info("Updated [{}] SmartServices", updatedCount.get());
+  }
+
+  /**
+   * Only APPROVED services participate in the domain; their Device is the only one
+   * that may be active in the FHIR store.
+   */
+  private FHIRDeviceStatus expectedDeviceStatus(SmartServiceStatus status) {
+    return status == SmartServiceStatus.APPROVED ? FHIRDeviceStatus.ACTIVE : FHIRDeviceStatus.INACTIVE;
+  }
+
+  private void syncDeviceStatus(SmartService smartService) {
+    markDeviceStatus(smartService, expectedDeviceStatus(smartService.getStatus()));
+  }
+
+  /**
+   * Older Devices lack a narrative; the FHIR server enforces dom-6 (resource
+   * should have narrative) on writes, so ensure one exists before updating.
+   */
+  private void ensureNarrative(Device device) {
+    if (device.hasText() && device.getText().hasDiv()) {
+      return;
+    }
+    final String name = device.hasDeviceName() ? device.getDeviceNameFirstRep().getName() : device.getId();
+    device.getText().setStatus(org.hl7.fhir.r4.model.Narrative.NarrativeStatus.GENERATED);
+    device.getText().setDivAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">Device " + name + "</div>");
+  }
+
+  private void markDeviceStatus(SmartService smartService, FHIRDeviceStatus expected) {
+    if (StringUtils.isBlank(smartService.getClientId())) {
+      return;
+    }
+    try {
+      final Device device = deviceFhirClientService
+          .getResourceByIdentifier(smartService.getClientId(), CLIENT_ID_SYSTEM, null);
+      if (device == null) {
+        LOG.warn("No Device found for SmartService with client_id [{}]; cannot update status",
+            smartService.getClientId());
+        return;
+      }
+      if (device.getStatus() != expected) {
+        LOG.info("Updating Device/{} status from [{}] to [{}]",
+            device.getIdElement().getIdPart(), device.getStatus(), expected);
+        device.setStatus(expected);
+        ensureNarrative(device);
+        deviceFhirClientService.storeResource(device);
+      }
+    } catch (Exception e) {
+      LOG.error(String.format("Failed to sync Device status for SmartService with client_id [%s], continuing",
+          smartService.getClientId()), e);
+    }
+  }
+
+  /**
+   * Aligns every Device in the FHIR store with the SmartService administration:
+   * approved services get an active Device, everything else (pending, rejected or
+   * no longer known here) is deactivated. Devices without our client-id identifier
+   * and devices already in a non-active end state are left untouched.
+   */
+  public void reconcileDeviceStatuses() {
+    final Map<String, SmartService> serviceByClientId = new HashMap<>();
+    repository.findAll().forEach(smartService -> {
+      if (StringUtils.isNotBlank(smartService.getClientId())) {
+        serviceByClientId.put(smartService.getClientId(), smartService);
+      }
+    });
+
+    final List<Device> devices;
+    try {
+      devices = deviceFhirClientService.getResources();
+    } catch (Exception e) {
+      LOG.error("Failed to fetch Devices for status reconciliation, skipping this round", e);
+      return;
+    }
+
+    int updated = 0;
+    for (Device device : devices) {
+      final String clientId = device.getIdentifier().stream()
+          .filter(identifier -> CLIENT_ID_SYSTEM.equals(identifier.getSystem()))
+          .map(Identifier::getValue)
+          .filter(StringUtils::isNotBlank)
+          .findFirst().orElse(null);
+      if (clientId == null) {
+        continue;
+      }
+
+      final SmartService smartService = serviceByClientId.get(clientId);
+      final String deviceId = device.getIdElement().getIdPart();
+      // Multiple Devices can carry the same client-id identifier (legacy duplicates);
+      // only the Device the administration points at may be active for an approved service.
+      final boolean approvedOwnDevice = smartService != null
+          && smartService.getStatus() == SmartServiceStatus.APPROVED
+          && deviceId.equals(smartService.getFhirStoreDeviceId());
+      final FHIRDeviceStatus actual = device.getStatus();
+      FHIRDeviceStatus target = null;
+      if (approvedOwnDevice && actual != FHIRDeviceStatus.ACTIVE) {
+        target = FHIRDeviceStatus.ACTIVE;
+      } else if (!approvedOwnDevice && actual == FHIRDeviceStatus.ACTIVE) {
+        target = FHIRDeviceStatus.INACTIVE;
+      }
+
+      if (target != null) {
+        try {
+          LOG.info("Reconciling Device/{}: [{}] -> [{}] (smart service status: [{}])",
+              deviceId, actual, target, smartService != null ? smartService.getStatus() : null);
+          device.setStatus(target);
+          ensureNarrative(device);
+          deviceFhirClientService.storeResource(device);
+          updated++;
+        } catch (Exception e) {
+          LOG.error(String.format("Failed to reconcile Device/%s, continuing",
+              device.getIdElement().getIdPart()), e);
+        }
+      }
+    }
+    LOG.info("Device status reconciliation done, updated [{}] of [{}] Devices", updated, devices.size());
   }
 
   public void repairClientIds() {
