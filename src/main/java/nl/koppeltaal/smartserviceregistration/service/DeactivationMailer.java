@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
+import nl.koppeltaal.smartserviceregistration.util.EmailUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +83,10 @@ public class DeactivationMailer {
 
   /** The deactivation mail is due only once, so a failing lookup must not cost the admins their mail. */
   private Optional<String> creatorEmail(SmartService smartService) {
+    // createdBy is the creator's sub, which some realms fill with the email address itself
+    if (EmailUtils.isEmailAddress(smartService.getCreatedBy())) {
+      return Optional.of(smartService.getCreatedBy());
+    }
     try {
       return domainAdminUserService.findEmail(smartService.getCreatedBy());
     } catch (RuntimeException e) {

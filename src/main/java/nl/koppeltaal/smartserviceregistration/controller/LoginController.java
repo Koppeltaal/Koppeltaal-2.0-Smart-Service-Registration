@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 import nl.koppeltaal.smartserviceregistration.dto.AuthorizationUrlDto;
 import nl.koppeltaal.smartserviceregistration.oidc.service.OidcClientService;
 import nl.koppeltaal.smartserviceregistration.service.DomainAdminUserService;
+import nl.koppeltaal.smartserviceregistration.util.EmailUtils;
 import nl.koppeltaal.smartserviceregistration.util.UrlUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -70,8 +71,8 @@ public class LoginController {
 	private void recordLogin(HttpSession httpSession, String userReference, SessionTokenStorage tokenStorage) {
 		try {
 			String identifier = oidcClientService.getUserIdentifierFromCredentials(tokenStorage);
-			// without an email claim the identifier is the sub
-			if (StringUtils.isNotBlank(identifier) && !identifier.equals(userReference)) {
+			// the email claim, or without one the sub, which some realms fill with the email address
+			if (EmailUtils.isEmailAddress(identifier)) {
 				httpSession.setAttribute("email", identifier);
 			}
 			domainAdminUserService.recordLogin(userReference, identifier);

@@ -90,4 +90,16 @@ class LoginControllerTest {
     assertThat(session.getAttribute("user")).isEqualTo("sub-1");
     assertThat(session.getAttribute("email")).isEqualTo("vendor@example.com");
   }
+
+  @Test
+  void keepsASubThatIsAnEmailAddressAsTheEmail() throws Exception {
+    // in a realm that uses the email address as the subject, the email claim equals the sub
+    when(oidcClientService.getUserIdFromCredentials(any())).thenReturn("joris@headease.nl");
+    when(oidcClientService.getUserIdentifierFromCredentials(any())).thenReturn("joris@headease.nl");
+
+    controller.codeResponse(session, new MockHttpServletRequest(), "code-1", "state-1");
+
+    assertThat(session.getAttribute("email")).isEqualTo("joris@headease.nl");
+    verify(domainAdminUserService).recordLogin("joris@headease.nl", "joris@headease.nl");
+  }
 }

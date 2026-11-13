@@ -168,4 +168,16 @@ class DeactivationMailerTest {
 
     assertThat(sentMessage().getTo()).containsExactly("joris@headease.nl", "roland@headease.nl");
   }
+
+  @Test
+  void mailsACreatorWhoseIdIsTheirEmailAddress() {
+    // in a realm that uses the email address as the subject, createdBy holds the creator's email address
+    when(senderProvider.getIfAvailable()).thenReturn(sender);
+    SmartService smartService = deactivated();
+    smartService.setCreatedBy("patrick@example.com");
+
+    mailer(ADMINS).sendDeactivation(smartService);
+
+    assertThat(sentMessage().getTo()).containsExactly("joris@headease.nl", "roland@headease.nl", "patrick@example.com");
+  }
 }

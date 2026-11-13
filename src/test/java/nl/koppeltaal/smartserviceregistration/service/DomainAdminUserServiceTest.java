@@ -63,4 +63,15 @@ class DomainAdminUserServiceTest {
     assertThat(service.findEmail("sub-2")).isEmpty();
     assertThat(service.findEmail(null)).isEmpty();
   }
+
+  @Test
+  void recordsASubThatIsAnEmailAddressAsTheEmail() {
+    when(repository.findById("vendor@example.com")).thenReturn(Optional.empty());
+
+    service.recordLogin("vendor@example.com", "vendor@example.com");
+
+    ArgumentCaptor<DomainAdminUser> saved = ArgumentCaptor.forClass(DomainAdminUser.class);
+    verify(repository).save(saved.capture());
+    assertThat(saved.getValue().getEmail()).isEqualTo("vendor@example.com");
+  }
 }

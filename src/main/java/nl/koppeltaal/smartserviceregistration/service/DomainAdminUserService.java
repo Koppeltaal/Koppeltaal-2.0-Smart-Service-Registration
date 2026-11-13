@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import nl.koppeltaal.smartserviceregistration.model.DomainAdminUser;
 import nl.koppeltaal.smartserviceregistration.repository.DomainAdminUserRepository;
+import nl.koppeltaal.smartserviceregistration.util.EmailUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +18,15 @@ public class DomainAdminUserService {
   }
 
   /**
-   * @param identifier the email claim of the ID token, or the sub when the token has none
+   * @param identifier the email claim of the ID token, or the sub when the token has none; some realms use the email
+   *                   address as the sub
    */
   public void recordLogin(String sub, String identifier) {
     if (StringUtils.isBlank(sub)) {
       return;
     }
     final DomainAdminUser user = repository.findById(sub).orElseGet(() -> new DomainAdminUser(sub));
-    if (StringUtils.isNotBlank(identifier) && !identifier.equals(sub)) {
+    if (EmailUtils.isEmailAddress(identifier)) {
       user.setEmail(identifier);
     }
     user.setLastLoginOn(LocalDateTime.now());
