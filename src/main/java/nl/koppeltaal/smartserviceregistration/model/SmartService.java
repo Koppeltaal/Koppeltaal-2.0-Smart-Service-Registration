@@ -3,6 +3,7 @@ package nl.koppeltaal.smartserviceregistration.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +24,20 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
     @Index(name = "client_id_index", columnList = "client_id", unique = true)
 })
 public class SmartService extends DbEntity {
+
+  public static final int MAX_DEACTIVATION_REASON_LENGTH = 1000;
+
+  /**
+   * Every writer saves the whole entity; without this a stale copy would silently undo a deactivation or suspension.
+   */
+  @Version
+  private long version;
+
+  @Column(name = "deactivated_on")
+  private LocalDateTime deactivatedOn;
+
+  @Column(name = "deactivation_reason", length = MAX_DEACTIVATION_REASON_LENGTH)
+  private String deactivationReason;
 
   @ManyToOne
   @JoinColumn(name = "role_id")
@@ -165,6 +180,22 @@ public class SmartService extends DbEntity {
     this.allowedRedirects = allowedRedirects;
   }
 
+  public LocalDateTime getDeactivatedOn() {
+    return deactivatedOn;
+  }
+
+  public void setDeactivatedOn(LocalDateTime deactivatedOn) {
+    this.deactivatedOn = deactivatedOn;
+  }
+
+  public String getDeactivationReason() {
+    return deactivationReason;
+  }
+
+  public void setDeactivationReason(String deactivationReason) {
+    this.deactivationReason = deactivationReason;
+  }
+
   @Override
   public String toString() {
     return "SmartService{" +
@@ -179,6 +210,8 @@ public class SmartService extends DbEntity {
             ", practitionerIdps=" + practitionerIdps +
             ", relatedPersonIdps=" + relatedPersonIdps +
             ", allowedRedirects=" + allowedRedirects +
+            ", deactivatedOn=" + deactivatedOn +
+            ", deactivationReason='" + deactivationReason + '\'' +
             "} " + super.toString();
   }
 }

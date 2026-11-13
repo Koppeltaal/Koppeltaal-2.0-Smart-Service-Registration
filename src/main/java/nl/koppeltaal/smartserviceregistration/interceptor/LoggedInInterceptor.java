@@ -3,6 +3,8 @@ package nl.koppeltaal.smartserviceregistration.interceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,9 +14,12 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class LoggedInInterceptor implements HandlerInterceptor {
 
   private final String authorizationEndpointToken;
+  private final String deactivationEndpointToken;
 
-  public LoggedInInterceptor(@Value("${authorizations.endpoint.token:}") String authorizationEndpointToken) {
+  public LoggedInInterceptor(@Value("${authorizations.endpoint.token:}") String authorizationEndpointToken,
+                             @Value("${deactivation.endpoint.token:}") String deactivationEndpointToken) {
     this.authorizationEndpointToken = authorizationEndpointToken;
+    this.deactivationEndpointToken = deactivationEndpointToken;
   }
 
   @Override
@@ -34,6 +39,14 @@ public class LoggedInInterceptor implements HandlerInterceptor {
       } else {
         return HandlerInterceptor.super.preHandle(request, response, handler);
       }
+
+    // accessed by the FHIR server; without a configured secret nobody gets in
+    } else if ("/deactivations".equals(path)) {
+      if (!matchesConfiguredToken(deactivationEndpointToken, request.getHeader("X-Deactivation-Token"))) {
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        return false;
+      }
+      return HandlerInterceptor.super.preHandle(request, response, handler);
     }
 
     final HttpSession session = request.getSession();
@@ -45,5 +58,10 @@ public class LoggedInInterceptor implements HandlerInterceptor {
     }
 
     return HandlerInterceptor.super.preHandle(request, response, handler);
+  }
+
+  private static boolean matchesConfiguredToken(String configured, String presented) {
+    return StringUtils.isNotBlank(configured) && presented != null
+        && MessageDigest.isEqual(configured.getBytes(StandardCharsets.UTF_8), presented.getBytes(StandardCharsets.UTF_8));
   }
 }

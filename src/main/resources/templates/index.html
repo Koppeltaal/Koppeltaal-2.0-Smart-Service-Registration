@@ -49,12 +49,19 @@
       <td>
         <form method="post" action="/smart-service/status">
           <input type="hidden" name="id" th:value="${smartService.id}">
-          <select name="status" onchange="this.form.submit()">
+          <select name="status" onchange="this.form.submit()" th:disabled='${#strings.equals(smartService.status, "SUSPENDED") and !suspensionAdmin}'>
+            <option value="DEACTIVATED" th:if='${#strings.equals(smartService.status, "DEACTIVATED")}' selected disabled>⏸ Deactivated</option>
+            <option value="SUSPENDED" th:if='${#strings.equals(smartService.status, "SUSPENDED") and !suspensionAdmin}' selected disabled>🔒 Suspended</option>
+            <option value="SUSPENDED" th:if="${suspensionAdmin}" th:selected='${#strings.equals(smartService.status, "SUSPENDED")}'>🔒 Suspended</option>
             <option value="PENDING" th:selected='${#strings.equals(smartService.status, "PENDING")}'>😴 Pending</option>
             <option value="APPROVED" th:selected='${#strings.equals(smartService.status, "APPROVED")}'>✅ Approved</option>
             <option value="REJECTED" th:selected='${#strings.equals(smartService.status, "REJECTED")}'>⛔ Rejected</option>
           </select>
         </form>
+        <p class="status-note" th:if="${smartService.deactivatedOn != null}"
+           th:text="|Automatisch gedeactiveerd op ${#temporals.format(smartService.deactivatedOn, 'dd-MM-yyyy HH:mm')}: ${smartService.deactivationReason}|"></p>
+        <p class="status-note" th:if='${#strings.equals(smartService.status, "DEACTIVATED")}'>Herstel de fout en zet de status daarna weer op Approved.</p>
+        <p class="status-note" th:if='${#strings.equals(smartService.status, "SUSPENDED")}'>Geschorst door Koppeltaal beheer. Alleen beheer kan de schorsing opheffen.</p>
       </td>
       <td th:text="${#temporals.format(smartService.createdOn, 'dd-MM-yyyy HH:mm')}"/>
       <td th:text="${smartService.createdBy}"/>

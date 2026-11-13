@@ -14,8 +14,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import nl.koppeltaal.smartserviceregistration.dto.AuthorizationUrlDto;
 import nl.koppeltaal.smartserviceregistration.oidc.service.OidcClientService;
+import nl.koppeltaal.smartserviceregistration.service.DomainAdminUserService;
 import nl.koppeltaal.smartserviceregistration.util.UrlUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,10 +33,14 @@ import org.springframework.web.servlet.view.RedirectView;
 
 public class LoginController {
 
-	final OidcClientService oidcClientService;
+	private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
 
-	public LoginController(OidcClientService oidcClientService) {
+	final OidcClientService oidcClientService;
+	final DomainAdminUserService domainAdminUserService;
+
+	public LoginController(OidcClientService oidcClientService, DomainAdminUserService domainAdminUserService) {
 		this.oidcClientService = oidcClientService;
+		this.domainAdminUserService = domainAdminUserService;
 	}
 
 	@GetMapping("code_response")
@@ -48,9 +55,29 @@ public class LoginController {
 		oidcClientService.getIdToken(code, UrlUtils.getServerUrl("/code_response", request), tokenStorage);
 
 		String userReference = oidcClientService.getUserIdFromCredentials(tokenStorage);
+		// a reused session must not keep the email, and with it the admin rights, of an earlier login
+		httpSession.removeAttribute("email");
 		httpSession.setAttribute("user", userReference);
+		recordLogin(httpSession, userReference, tokenStorage);
 		return "redirect:/";
 
+	}
+
+	/**
+	 * Keeps the login email in the session, which decides who is a suspension admin, and records it for the mail to the
+	 * creator of a deactivated application.
+	 */
+	private void recordLogin(HttpSession httpSession, String userReference, SessionTokenStorage tokenStorage) {
+		try {
+			String identifier = oidcClientService.getUserIdentifierFromCredentials(tokenStorage);
+			// without an email claim the identifier is the sub
+			if (StringUtils.isNotBlank(identifier) && !identifier.equals(userReference)) {
+				httpSession.setAttribute("email", identifier);
+			}
+			domainAdminUserService.recordLogin(userReference, identifier);
+		} catch (JwkException | RuntimeException e) {
+			LOG.warn(String.format("Failed to record the login of user [%s], continuing", userReference), e);
+		}
 	}
 
 	@GetMapping("/login")

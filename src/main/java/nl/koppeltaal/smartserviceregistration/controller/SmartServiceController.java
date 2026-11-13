@@ -15,6 +15,9 @@ import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import nl.koppeltaal.smartserviceregistration.model.SmartServiceStatus;
 import nl.koppeltaal.smartserviceregistration.repository.IdentityProviderRepository;
 import nl.koppeltaal.smartserviceregistration.service.SmartServiceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("smart-service")
 public class SmartServiceController {
+
+  private static final Logger LOG = LoggerFactory.getLogger(SmartServiceController.class);
 
   private final SmartServiceService smartServiceService;
   private final SmartServiceConfiguration smartServiceConfiguration;
@@ -90,9 +95,17 @@ public class SmartServiceController {
     return smartService != null ? serveHtml(smartService.getId(), model, session) : serveHtml(model, session);
   }
 
+  /** Someone changed the application at the same time; the overview shows its current state, so the user can retry. */
+  @ExceptionHandler(OptimisticLockingFailureException.class)
+  public String handleConcurrentChange(OptimisticLockingFailureException exception) {
+    LOG.warn("Discarded an edit of a SmartService that changed at the same time: {}", exception.getMessage());
+    return "redirect:/";
+  }
+
   @PostMapping(value = "status", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
   public String registerNewServiceRequest(@RequestParam UUID id, @RequestParam SmartServiceStatus status, HttpSession session) {
-    smartServiceService.updateSmartServiceStatus(id, status, (String) session.getAttribute("user"));
+    smartServiceService.updateSmartServiceStatus(id, status, (String) session.getAttribute("user"),
+        (String) session.getAttribute("email"));
 
     return "redirect:/";
   }

@@ -11,6 +11,7 @@ package nl.koppeltaal.smartserviceregistration.controller;
 import jakarta.servlet.http.HttpSession;
 import nl.koppeltaal.smartserviceregistration.service.RoleService;
 import nl.koppeltaal.smartserviceregistration.service.SmartServiceService;
+import nl.koppeltaal.smartserviceregistration.service.SuspensionAdmins;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +21,13 @@ public class HomeController {
 
   private final SmartServiceService smartServiceService;
   private final RoleService roleService;
+  private final SuspensionAdmins suspensionAdmins;
 
   public HomeController(SmartServiceService smartServiceService,
-      RoleService roleService) {
+      RoleService roleService, SuspensionAdmins suspensionAdmins) {
     this.smartServiceService = smartServiceService;
     this.roleService = roleService;
+    this.suspensionAdmins = suspensionAdmins;
   }
 
   @GetMapping("/")
@@ -33,6 +36,7 @@ public class HomeController {
     model.addAttribute("smartServices", smartServiceService.findAll());
     model.addAttribute("roles", roleService.findAll());
     model.addAttribute("user", session.getAttribute("user"));
+    model.addAttribute("suspensionAdmin", suspensionAdmins.isAdmin((String) session.getAttribute("email")));
 
     return "index";
   }

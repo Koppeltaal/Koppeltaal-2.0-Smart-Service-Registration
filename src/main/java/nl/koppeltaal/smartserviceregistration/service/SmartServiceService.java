@@ -8,8 +8,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 import jakarta.annotation.PostConstruct;
 
 import ca.uhn.fhir.rest.gclient.ICriterion;
@@ -21,9 +23,11 @@ import nl.koppeltaal.smartserviceregistration.model.PermissionScope;
 import nl.koppeltaal.smartserviceregistration.model.Role;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
 import nl.koppeltaal.smartserviceregistration.model.SmartServiceStatus;
+import nl.koppeltaal.smartserviceregistration.model.DeactivationDetection;
 import nl.koppeltaal.smartserviceregistration.repository.PermissionRepository;
 import nl.koppeltaal.smartserviceregistration.repository.RoleRepository;
 import nl.koppeltaal.smartserviceregistration.repository.SmartServiceRepository;
+import nl.koppeltaal.smartserviceregistration.repository.DeactivationDetectionRepository;
 import nl.koppeltaal.spring.boot.starter.smartservice.service.fhir.DeviceFhirClientService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +43,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionOperations;
 
 @Service
 public class SmartServiceService {
@@ -48,23 +53,49 @@ public class SmartServiceService {
   public static final String CLIENT_ID_PLACEHOLDER = "to_be_replaced_by_device_id";
 
   private final SmartServiceRepository repository;
+  private final DeactivationDetectionRepository deactivationDetectionRepository;
   private final RoleRepository roleRepository;
   private final PermissionRepository permissionRepository;
   private final DeviceFhirClientService deviceFhirClientService;
+  private final TransactionOperations transactions;
+  private final SuspensionAdmins suspensionAdmins;
 
   private final String jwksUrl;
   private final String domainAdminInitializeClientId;
 
+  /**
+   * Serializes status changes with {@link #reconcileDeviceStatuses()}, which pairs a snapshot of the statuses with the
+   * Devices it fetches afterwards: a status change in between would otherwise be undone on its Device until the next run.
+   */
+  private final ReentrantLock deviceStatusLock = new ReentrantLock();
+
+  /**
+   * @param newlyDeactivated this call deactivated the service, so the deactivation mail is due
+   * @param confirmed        the FHIR server may lift its own block: Device/&lt;client id&gt; is inactive, or someone
+   *                         approved the service again after this detection
+   */
+  public record DeactivationResult(SmartService smartService, boolean newlyDeactivated, boolean confirmed) {
+  }
+
+  private record Recorded(SmartService smartService, boolean newlyDeactivated) {
+  }
+
   public SmartServiceService(SmartServiceRepository repository,
+                             DeactivationDetectionRepository deactivationDetectionRepository,
                              RoleRepository roleRepository,
                              PermissionRepository permissionRepository,
                              DeviceFhirClientService deviceFhirClientService,
+                             TransactionOperations transactions,
+                             SuspensionAdmins suspensionAdmins,
                              @Value("${smart.service.init.jwks_url:}") String jwksUrl,
                              @Value("${smart.service.init.client_id:}") String domainAdminInitializeClientId) {
     this.repository = repository;
+    this.deactivationDetectionRepository = deactivationDetectionRepository;
     this.roleRepository = roleRepository;
     this.permissionRepository = permissionRepository;
     this.deviceFhirClientService = deviceFhirClientService;
+    this.transactions = transactions;
+    this.suspensionAdmins = suspensionAdmins;
     this.jwksUrl = jwksUrl;
     this.domainAdminInitializeClientId = domainAdminInitializeClientId;
   }
@@ -222,19 +253,117 @@ public class SmartServiceService {
     return repository.findByOrderByCreatedOnDesc();
   }
 
-  public SmartService updateSmartServiceStatus(UUID id, SmartServiceStatus status, String user) {
+  public Optional<SmartService> findByClientId(String clientId) {
+    return repository.findByClientId(clientId);
+  }
 
-    final SmartService smartService = repository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Unknown id"));
+  /**
+   * Handles a detection by the FHIR server in enforce mode. Only the first delivery of a detection may change the
+   * status; a later one, a retry or an older delivery that arrives late, only makes sure the Device is inactive while
+   * the service is not approved.
+   */
+  public Optional<DeactivationResult> deactivate(String clientId, String detectionId, String reason) {
+    deviceStatusLock.lock();
+    try {
+      // committed before the lock is released; the detection is recorded together with its effect or not at all
+      final Optional<Recorded> recorded = transactions.execute(status -> record(clientId, detectionId, reason));
+      if (recorded == null || recorded.isEmpty()) {
+        return Optional.empty();
+      }
+      final SmartService smartService = recorded.get().smartService();
+      final boolean confirmed = smartService.getStatus() == SmartServiceStatus.APPROVED || deactivateDevice(smartService);
+      return Optional.of(new DeactivationResult(smartService, recorded.get().newlyDeactivated(), confirmed));
+    } finally {
+      deviceStatusLock.unlock();
+    }
+  }
 
-    //WARN: lacking any form of security role check
-    LOG.info("User [{}] changed status of SmartService from [{}] to [{}].", user,
-        smartService.getStatus(), status);
+  private Optional<Recorded> record(String clientId, String detectionId, String reason) {
+    final Optional<SmartService> found = repository.findByClientId(clientId);
+    if (found.isEmpty()) {
+      return Optional.empty();
+    }
+    final SmartService smartService = found.get();
+    if (deactivationDetectionRepository.existsById(detectionId)) {
+      return Optional.of(new Recorded(smartService, false));
+    }
+    deactivationDetectionRepository.save(new DeactivationDetection(detectionId, clientId));
+    if (smartService.getStatus() != SmartServiceStatus.APPROVED) {
+      return Optional.of(new Recorded(smartService, false));
+    }
+    LOG.warn("Deactivating SmartService with client_id [{}]: {}", clientId, reason);
+    smartService.setStatus(SmartServiceStatus.DEACTIVATED);
+    smartService.setDeactivatedOn(LocalDateTime.now());
+    smartService.setDeactivationReason(StringUtils.truncate(reason, SmartService.MAX_DEACTIVATION_REASON_LENGTH));
+    return Optional.of(new Recorded(repository.save(smartService), true));
+  }
 
-    smartService.setStatus(status);
-    final SmartService saved = repository.save(smartService);
-    syncDeviceStatus(saved);
-    return saved;
+  /**
+   * Deactivates the Device the FHIR server checks, Device/&lt;client id&gt;. Unlike {@link #syncDeviceStatus}, which is
+   * best effort, this reports whether it worked, because the FHIR server lifts its own block on our confirmation.
+   */
+  private boolean deactivateDevice(SmartService smartService) {
+    try {
+      final Device device = deviceFhirClientService.getResourceByReference(smartService.getClientId());
+      if (device == null) {
+        LOG.error("No Device/{} to deactivate for the deactivated SmartService", smartService.getClientId());
+        return false;
+      }
+      if (device.getStatus() != FHIRDeviceStatus.INACTIVE) {
+        LOG.info("Deactivating Device/{}", smartService.getClientId());
+        device.setStatus(FHIRDeviceStatus.INACTIVE);
+        ensureNarrative(device);
+        deviceFhirClientService.storeResource(device);
+      }
+      return true;
+    } catch (Exception e) {
+      LOG.error(String.format("Failed to deactivate Device/%s; the FHIR server will retry", smartService.getClientId()), e);
+      return false;
+    }
+  }
+
+  /**
+   * Only the FHIR server deactivates, so that a deactivation always carries its time and reason; anyone may reactivate
+   * a deactivated service. Suspending, and changing a suspended service, is up to the suspension admins.
+   *
+   * @param userEmail the email the user logged in with, which decides who is a suspension admin
+   */
+  public SmartService updateSmartServiceStatus(UUID id, SmartServiceStatus status, String user, String userEmail) {
+    deviceStatusLock.lock();
+    try {
+      final SmartService smartService = repository.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Unknown id"));
+      final SmartServiceStatus previous = smartService.getStatus();
+
+      if (status == SmartServiceStatus.DEACTIVATED && previous != SmartServiceStatus.DEACTIVATED) {
+        throw new SmartServiceRegistrationException(smartService,
+            "Only the FHIR server deactivates applications; choose Rejected to block one.", null);
+      }
+      if (status == SmartServiceStatus.SUSPENDED && previous != SmartServiceStatus.SUSPENDED
+          && !suspensionAdmins.isAdmin(userEmail)) {
+        throw new SmartServiceRegistrationException(smartService,
+            "Only a suspension admin can suspend an application.", null);
+      }
+      if (previous == SmartServiceStatus.SUSPENDED && !suspensionAdmins.isAdmin(userEmail)) {
+        throw new SmartServiceRegistrationException(smartService,
+            "Only a suspension admin can lift the suspension of an application.", null);
+      }
+
+      //WARN: lacking any form of security role check
+      smartService.setStatus(status);
+      // a suspension keeps why the service was deactivated before
+      if (status != SmartServiceStatus.DEACTIVATED && status != SmartServiceStatus.SUSPENDED) {
+        smartService.setDeactivatedOn(null);
+        smartService.setDeactivationReason(null);
+      }
+      final SmartService saved = repository.save(smartService);
+      LOG.info("User [{}] changed the status of SmartService with client_id [{}] from [{}] to [{}]", user,
+          saved.getClientId(), previous, status);
+      syncDeviceStatus(saved);
+      return saved;
+    } finally {
+      deviceStatusLock.unlock();
+    }
   }
 
   public SmartService updateSmartServiceName(UUID id, String name, String user) {
@@ -292,19 +421,23 @@ public class SmartServiceService {
   }
 
   public void delete(UUID id, String user) {
+    deviceStatusLock.lock();
+    try {
+      final Optional<SmartService> optionalSmartService = repository.findById(id);
 
-    final Optional<SmartService> optionalSmartService = repository.findById(id);
+      if(optionalSmartService.isEmpty()) {
+        LOG.warn("User [{}] tried to delete smart service with id [{}] but it doesn't exist", user, id);
+        return;
+      }
 
-    if(optionalSmartService.isEmpty()) {
-      LOG.warn("User [{}] tried to delete smart service with id [{}] but it doesn't exist", user, id);
-      return;
+      final SmartService smartService = optionalSmartService.get();
+
+      LOG.info("User [{}] deleted SmartService {}.", user, smartService);
+      markDeviceStatus(smartService, FHIRDeviceStatus.INACTIVE);
+      repository.delete(smartService);
+    } finally {
+      deviceStatusLock.unlock();
     }
-
-    final SmartService smartService = optionalSmartService.get();
-
-    LOG.info("User [{}] deleted SmartService {}.", user, smartService);
-    markDeviceStatus(smartService, FHIRDeviceStatus.INACTIVE);
-    repository.delete(smartService);
   }
 
   /**
@@ -414,6 +547,15 @@ public class SmartServiceService {
    * and devices already in a non-active end state are left untouched.
    */
   public void reconcileDeviceStatuses() {
+    deviceStatusLock.lock();
+    try {
+      reconcileDeviceStatusesUnderLock();
+    } finally {
+      deviceStatusLock.unlock();
+    }
+  }
+
+  private void reconcileDeviceStatusesUnderLock() {
     final Map<String, SmartService> serviceByClientId = new HashMap<>();
     repository.findAll().forEach(smartService -> {
       if (StringUtils.isNotBlank(smartService.getClientId())) {

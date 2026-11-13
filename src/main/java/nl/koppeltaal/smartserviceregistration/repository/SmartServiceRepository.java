@@ -1,6 +1,7 @@
 package nl.koppeltaal.smartserviceregistration.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import nl.koppeltaal.smartserviceregistration.model.SmartService;
@@ -10,4 +11,5 @@ public interface SmartServiceRepository extends CrudRepository<SmartService, UUI
   List<SmartService> findByOrderByCreatedOnDesc();
   Set<SmartService> findAllById(Iterable<UUID> ids);
   Set<SmartService> findAllByFhirStoreDeviceIdIsNull();
+  Optional<SmartService> findByClientId(String clientId);
 }
