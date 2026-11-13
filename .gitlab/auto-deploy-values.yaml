@@ -1,0 +1,10 @@
+# domain-admin needs about a minute to start (Spring, Flyway, Hibernate and the Device reconciliation at boot), while
+# the default liveness probe restarts it after about 45 seconds. Liveness and readiness only start once this probe
+# succeeds; it allows up to 30 + 30 x 10 seconds. The JWKS endpoint answers 200 without a login.
+startupProbe:
+  enabled: true
+  path: /.well-known/jwks.json
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30
