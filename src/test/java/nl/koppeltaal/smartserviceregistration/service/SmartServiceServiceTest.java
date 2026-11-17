@@ -20,7 +20,10 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -61,6 +64,8 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.support.CronExpression;
 import org.springframework.transaction.support.TransactionOperations;
 
 @ExtendWith(MockitoExtension.class)
@@ -280,6 +285,31 @@ class SmartServiceServiceTest {
     service.reconcileDeviceStatuses();
 
     verify(deviceFhirClientService, never()).storeResource(any(Device.class));
+  }
+
+  @Test
+  void theMinuteJobSendsNoFhirRequestsWhenEveryServiceHasADevice() {
+    when(repository.findAllByFhirStoreDeviceIdIsNull()).thenReturn(Set.of());
+    when(repository.findAll()).thenReturn(List.of(smartService(SmartServiceStatus.APPROVED)));
+
+    service.ensureDevicesJob();
+
+    // every FHIR request becomes an AuditEvent; a search of all Devices every minute flooded the audit log
+    verifyNoInteractions(deviceFhirClientService);
+  }
+
+  @Test
+  void theReconciliationRunsOncePerNight() throws Exception {
+    Scheduled scheduled = SmartServiceService.class.getMethod("reconcileDeviceStatuses").getAnnotation(Scheduled.class);
+    assertThat(scheduled).as("reconcileDeviceStatuses is scheduled").isNotNull();
+    ZoneId zone = scheduled.zone().isEmpty() ? ZoneId.systemDefault() : ZoneId.of(scheduled.zone());
+    CronExpression cron = CronExpression.parse(scheduled.cron());
+
+    ZonedDateTime first = cron.next(ZonedDateTime.of(2026, 11, 17, 12, 0, 0, 0, zone));
+    ZonedDateTime second = cron.next(first);
+
+    assertThat(Duration.between(first, second)).isEqualTo(Duration.ofDays(1));
+    assertThat(first.withZoneSameInstant(ZoneId.of("Europe/Amsterdam")).getHour()).isLessThan(6);
   }
 
   private SmartService deactivated() {

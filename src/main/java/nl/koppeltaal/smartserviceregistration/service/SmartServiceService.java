@@ -166,7 +166,6 @@ public class SmartServiceService {
   public void ensureDevicesJob() {
     LOG.info("CRON - Ensuring devices");
     ensureDevices();
-    reconcileDeviceStatuses();
   }
 
   public void ensureDevices() {
@@ -545,7 +544,11 @@ public class SmartServiceService {
    * approved services get an active Device, everything else (pending, rejected or
    * no longer known here) is deactivated. Devices without our client-id identifier
    * and devices already in a non-active end state are left untouched.
+   * <p>
+   * Runs at boot and once a night. It searches all Devices and the FHIR server
+   * writes an AuditEvent for every result page, so it must not run every minute.
    */
+  @Scheduled(cron = "0 0 3 * * *", zone = "Europe/Amsterdam")
   public void reconcileDeviceStatuses() {
     deviceStatusLock.lock();
     try {
